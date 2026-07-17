@@ -10,9 +10,15 @@ logs/
 *.log
 nohup.out
 
-# Quarantine & caches (large / intermediate — not active corpus)
-data/_raw_no_punct/
+# Buffers / intermediate (NOT source texts)
 data/_cache/
+
+# Backup dirs (not source texts — transient processing copies)
+data/_raw_no_punct/clean_backup_*/
+data/_raw_no_punct/user_upload_backup/
+
+# Note: raw source texts under data/_raw_no_punct/ (*.txt) ARE tracked.
+# They are the original unpunctuated / traditional-script sources for reproducibility.
 
 # Editor / OS
 .DS_Store
