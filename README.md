@@ -167,13 +167,25 @@ auto_punct / 用户有标点本
 4. `海陵，炀王` → **海陵炀王**；`海陵，炀主` → **海陵炀主**（**只去逗号，不改字**）。  
 5. 断句完整规则见 [docs/segment-and-punct.md §3](docs/segment-and-punct.md)。  
 6. 规则修复 **≠** 全书精校。  
-### 异体字映射表（示例）
+### 异体字映射表
 
-| Category | Examples | Map to |
-|----------|----------|--------|
-| **CJK Ext A/B** | 㑹 㸃 㡬 䟽 䧟 㮚 䝉 䕶 㓂 㕘 | 会 点 几 疏 陷 栗 蒙 护 寇 参 |
-| **Japanese shinjitai** | 増 乗 従 収 両 恵 隠 | 增 乘 从 收 两 惠 隐 |
-| **Common variants** | 説 録 舎 暦 爲 涙 焼 抜 挿 | 说 录 舍 历 为 泪 烧 拔 插 |
+> **完整词库（79 单字 + 多字）与原则/验收**：[`docs/variant-map.md`](docs/variant-map.md)  
+> 脚本：[`scripts/normalize_variants.py`](scripts/normalize_variants.py)（全活跃库一键；`--dry-run` 可统计）
+
+| 类别 | 例（异体 → 简体） | 说明 |
+|------|-------------------|------|
+| **CJK 扩展区** | 㑹→会 㸃→点 㡬→几 䟽→疏 䧟→陷 㮚→栗 䝉→蒙 䕶→护 㓂→寇 㕘→参 𥳑→简 𫉬→获 | t2s 扫不到 |
+| **日文新字体** | 増→增 乗→乘 従→从 毎→每 収→收 両→两 児→儿 焼→烧 抜→拔 挿→插 説→说 録→录 舎→舍 暦→历 覧→览 郷→乡 総→总 | 翻刻/库 |
+| **旧字形/四库** | 爲→为 巻→卷 眞→真 徳→德 峯→峰 黒→黑 歳→岁 邉→边 衆→众 … | 见全文库 |
+| **用户点名** | **髙→高 宻→密 畱→留 戸→户 熈→熙**（另 煕→熙） | residual 必须 0 |
+| **多字** | 撒𪻞→撒改 | 金初人名 |
+
+```bash
+python3 scripts/normalize_variants.py            # 全活跃库
+python3 scripts/normalize_variants.py --dry-run  # 只统计
+```
+
+铁律：先 variants 再 resegment/repair；repair 词表跟**简体**；**禁止**只洗单书。
 
 ### 原始语料备份
 
@@ -221,6 +233,7 @@ auto_punct / 用户有标点本
 | [`scripts/repair_false_punct.py`](scripts/repair_false_punct.py) | 专名/年月误断回粘（词表+raw） |
 | [`scripts/ingest_dajin_full_after_punct.py`](scripts/ingest_dajin_full_after_punct.py) | 大金全本标点后入库管线 |
 | [`docs/segment-and-punct.md`](docs/segment-and-punct.md) | **分段与断句定稿文档** |
+| [`docs/variant-map.md`](docs/variant-map.md) | **异体字/旧字形完整映射库** |
 
 ---
 
@@ -281,6 +294,12 @@ text-search/
 ---
 
 ## 📜 变更摘要
+
+### 2026-07-17（夜）异体字库文档化
+
+- 新增 [`docs/variant-map.md`](docs/variant-map.md)：79 单字分类表 + 用户点名键 + 追加 SOP
+- `normalize_variants.py` residual 检查含 髙/宻/畱/戸/**熈/煕**
+- README 异体表示例改为指向完整库
 
 ### 2026-07-17（晚）分段 / 断句定稿沉淀
 

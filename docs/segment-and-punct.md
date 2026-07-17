@@ -31,7 +31,7 @@ python3 scripts/repair_false_punct.py \
 
 | 层 | 脚本 | 职责 |
 |----|------|------|
-| 字形 | `normalize_variants.py` | 扩展区 + 日新字体 + 旧字形（如 㑹→会、増→增、髙→高、宻→密、熈→熙） |
+| 字形 | `normalize_variants.py` | 完整库见 [variant-map.md](variant-map.md)（㑹→会、増→增、髙→高、宻→密、熈→熙…） |
 | 段 | `resegment_annots.py` | 卷层/目录/卷首/年季干支/`【干支】`/注释保护/年谱整帝 |
 | 句内 | `repair_false_punct.py` | 专名中间误断、年月误断、高置信语义逗号 |
 | 模型 | `auto_punctuate.py` | 只负责加标点；**不要**重跑模型修专名切分 |
@@ -291,6 +291,7 @@ HARD_FIXES（精确字符串）
 | 脚本 | 作用 |
 |------|------|
 | [`scripts/normalize_variants.py`](../scripts/normalize_variants.py) | 全库/单文件异体 |
+| [`docs/variant-map.md`](variant-map.md) | 异体/旧字形完整映射库 |
 | [`scripts/resegment_annots.py`](../scripts/resegment_annots.py) | 语义分段 |
 | [`scripts/repair_false_punct.py`](../scripts/repair_false_punct.py) | 专名/年月误断 |
 | [`scripts/auto_punctuate.py`](../scripts/auto_punctuate.py) | 模型自动标点 |

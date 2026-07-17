@@ -161,7 +161,7 @@ def main() -> None:
     print("---")
     print(f"scanned={total_files} changed={changed_files}")
     # highlight user keys
-    for k in ["宻→密", "髙→高", "畱→留", "戸→户", "徳→德", "隂→阴", "闗→关"]:
+    for k in ["宻→密", "髙→高", "畱→留", "戸→户", "熈→熙", "煕→熙", "徳→德", "隂→阴", "闗→关"]:
         if k in grand:
             print("USER", k, grand[k])
     top = sorted(grand.items(), key=lambda x: -x[1])[:25]
@@ -169,7 +169,7 @@ def main() -> None:
 
     # residual assert on key forms in active
     if not args.dry_run:
-        residual = {k: 0 for k in ["宻", "髙", "畱", "戸"]}
+        residual = {k: 0 for k in ["宻", "髙", "畱", "戸", "熈", "煕"]}
         for path in iter_active(args.files or None):
             t = path.read_text(encoding="utf-8", errors="replace")
             for k in residual:
