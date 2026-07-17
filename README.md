@@ -47,10 +47,12 @@ python3 -u server.py 8899
 | 📖 **阅读器** | 打开定位 / 阅读全书 | 任意命中→「打开定位」跳转行、书组头「阅读全书」 |
 | | 字号 A± / 行跳转 / 进度条 | 大书按约 400 行窗口分段加载 |
 | | **在本书中检索** | 同一套 `/` `+` 语法；上一处/下一处按 OR 感知 terms |
-| 🛠 **语料治理** | 异体字映射 | 扩展区字形（㑹→会）+ 日文新字体（増→增、従→从等） |
-| | 语义分段（编年类） | 保护 `【…】` 注释；按年号年、季节、干支、引书句式断段 |
+| 🛠 **语料治理** | 异体字映射 | `normalize_variants.py`：扩展区+日新字体+旧字形（㑹→会、増→增、髙→高、宻→密、熈→熙） |
+| | 语义分段 | `resegment_annots.py`：`chrono`/`kaoju`；注释保护；`【干支】` 岁标；四库卷三层 |
+| | 卷首年谱特殊 | 大金国志九帝年谱：每位皇帝整段，禁按月拆（[docs](docs/segment-and-punct.md)） |
+| | 专名误断修复 | `repair_false_punct.py` 词表+raw 回粘；禁全局删句号 |
 | | 简体+有标点门控 | 活跃库必须简体有标点；原料放 `_raw_no_punct/` 隔离 |
-| | 自动标点队列 | CPU 模型给无标点本加标点后自动入库 |
+| | 自动标点队列 | CPU 模型加标点后入库；**不指望重跑模型修好专名切分** |
 
 ---
 
@@ -124,6 +126,47 @@ python3 -u server.py 8899
 └─────────────────────────────┘
 ```
 
+### 标点后治理（分段 / 断句）— 定稿
+
+> 完整规则与验收清单：**[docs/segment-and-punct.md](docs/segment-and-punct.md)**  
+> 对应脚本：`normalize_variants.py` → `resegment_annots.py` → `repair_false_punct.py`
+
+```
+auto_punct / 用户有标点本
+       │
+       ▼
+  opencc t2s（繁→简）
+       │
+       ▼
+  normalize_variants.py     # 异体全库或单书
+       │
+       ▼
+  resegment_annots.py       # --style chrono | kaoju
+  · chrono：年号/季节/次年/【干支】/句中时间 peel
+  · kaoju：词条、策：/史记：、按（七国考）
+  · 四库：卷名 ‖ 纪年概括 ‖ 正文
+  · 卷首《金九帝年谱》：每位皇帝整段（≠正文编年）
+       │
+       ▼
+  repair_false_punct.py     # 专名/年月句内回粘（需 _raw_no_punct 底本）
+       │
+       ▼
+  抽查验收（干支/年谱/东。平等残量）
+```
+
+| 体例 | style | 代表书 |
+|------|-------|--------|
+| 编年 / 会编 / 国志纪年 | `chrono` | 大金国志、三朝北盟会编、建炎以来系年要录 |
+| 考据 / 名词解释 | `kaoju` | 七国考 |
+
+**铁律摘要：**
+
+1. 分段与句内误断是两层问题；**不要**重跑模型指望专名变好。  
+2. **禁止**「raw 二字连写就删中间句号」的全局对齐。  
+3. 卷首九帝年谱 **禁止**按月份/改元拆段。  
+4. `海陵，炀王` → **海陵炀王**。  
+5. 规则修复 **≠** 全书精校。
+
 ### 异体字映射表（示例）
 
 | Category | Examples | Map to |
@@ -173,6 +216,11 @@ python3 -u server.py 8899
 | [`scripts/fetch_shiji_full.py`](scripts/fetch_shiji_full.py) | 史记完整拉取 |
 | [`scripts/queue_dajin_guozhi_punct.py`](scripts/queue_dajin_guozhi_punct.py) | 大金国志单书标点队列 |
 | [`scripts/queue_liaosong_punct.py`](scripts/queue_liaosong_punct.py) | 辽宋批量标点队列 |
+| [`scripts/normalize_variants.py`](scripts/normalize_variants.py) | 全活跃库异体/旧字形清洗 |
+| [`scripts/resegment_annots.py`](scripts/resegment_annots.py) | 语义分段（chrono/kaoju；四库卷；九帝年谱） |
+| [`scripts/repair_false_punct.py`](scripts/repair_false_punct.py) | 专名/年月误断回粘（词表+raw） |
+| [`scripts/ingest_dajin_full_after_punct.py`](scripts/ingest_dajin_full_after_punct.py) | 大金全本标点后入库管线 |
+| [`docs/segment-and-punct.md`](docs/segment-and-punct.md) | **分段与断句定稿文档** |
 
 ---
 
@@ -224,10 +272,22 @@ text-search/
 | **EPUB 全 t2s 超时** | 长编 20 MB 转换超 agent turn | 先提取纯文本；只对残留繁体做映射 |
 | **auto-punct 中途改路径** | 标点完成后写入错误位置 | 标点进行中不挪动目标 `data/` 路径 |
 | **Git push 无 TTY** | `git push` 需用户名/密码交互 | `gh auth setup-git` 用 credential helper |
+| **auto-punct 专名切开** | `东。平` / `元帅，府` / `天会四，年` | `repair_false_punct` + 词表；**禁**全局按 raw 删句号 |
+| **九帝年谱被 peel 碎** | 卷首按「五月」「十二月」拆成多段 | `merge_dajin_nianpu_emperor_blocks`；年谱区跳过时间 peel |
+| **正文时间粘连** | `…事。十一月，议割…` 整段过长 | chrono 末道 `peel_inline_time_breaks`（保护【干支】+年事） |
+| **残本大金当全本** | ~135KB / plain 约 4 万 | 门控 plain≥约 14–15 万、卷首～四十一 |
+| **只修单书异体** | 他书仍见 宻/髙/熈 | `normalize_variants.py` 全活跃库 |
 
 ---
 
 ## 📜 变更摘要
+
+### 2026-07-17（晚）分段 / 断句定稿沉淀
+
+- 新增 [`docs/segment-and-punct.md`](docs/segment-and-punct.md)：chrono/kaoju、四库卷三层、【干支】岁标、九帝年谱、专名回粘铁律
+- 脚本：`normalize_variants.py`、`resegment_annots.py`（年谱整帝合并、时间 peel 跳过年谱区）、`repair_false_punct.py`（含 `海陵炀王` 硬修）
+- 大金国志：卷层/干支/年谱结构规则落地；**句内断句仍待继续词表，用户要求暂停正文大改**
+- 异体增补：如 熈→熙；全库 variants 可一键洗
 
 ### 2026-07-17（初版入库）
 
@@ -254,5 +314,6 @@ text-search/
 
 - 改 UI 后需 **Ctrl+F5 / Cmd+Shift+R** 硬刷新
 - 新增书 → 放 `data/<时期>/` → 更新 `books_meta.json` → 搜索抽查
+- 自动标点本治理 → 见 [docs/segment-and-punct.md](docs/segment-and-punct.md)
 - 端口被占：`fuser -k 8899/tcp` → `python3 -u server.py 8899`
 - Git 推送卡验证 → 确保 `gh auth setup-git` 已执行

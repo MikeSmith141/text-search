@@ -34,3 +34,9 @@ wikisource_download.py
 
 # Duplicate legacy UI at project root (canonical is static/index.html)
 /index.html
+
+# Local resegment/repair snapshots (not source corpus)
+*.bak
+*.bak_*
+**/*.bak_before_*
+data/**/*.bak_before_*
