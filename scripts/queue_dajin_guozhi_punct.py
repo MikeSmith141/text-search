@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""等上游 auto_punctuate 结束后，只给《大金国志》自动标点→简体→入库辽宋金夏。
+"""等上游 auto_punctuate 结束后，只给《大金国志》自动标点→简体→入库辽宋夏金。
 不处理东都事略 / 宋史纪事本末 / 辽史纪事本末。
 """
 from __future__ import annotations
@@ -17,7 +17,7 @@ from opencc import OpenCC
 WATCH_PID = int(sys.argv[1]) if len(sys.argv) > 1 else 3418750
 ROOT = Path("/root/projects/text-search")
 RAW = ROOT / "data" / "_raw_no_punct" / "大金国志.txt"
-ACTIVE = ROOT / "data" / "辽宋金夏" / "大金国志.txt"
+ACTIVE = ROOT / "data" / "辽宋夏金" / "大金国志.txt"
 META_PATH = ROOT / "data" / "books_meta.json"
 LOG = ROOT / "logs" / "dajin_guozhi_punct.log"
 PUNCT_LOG = ROOT / "logs" / "dajin_auto_punctuate.log"

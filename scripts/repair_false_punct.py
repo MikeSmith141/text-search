@@ -11,7 +11,7 @@
 
 用法:
   python3 scripts/repair_false_punct.py \\
-    --active data/辽宋金夏/大金国志.txt \\
+    --active data/辽宋夏金/大金国志.txt \\
     --raw data/_raw_no_punct/大金国志.txt
   --dry-run 只统计不写回
 """

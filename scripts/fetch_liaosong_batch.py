@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""辽宋金夏补书：daizhige 下载 → 简体/轻清洗 → 有标点进 active，无标点进 _raw_no_punct。"""
+"""辽宋夏金补书：daizhige 下载 → 简体/轻清洗 → 有标点进 active，无标点进 _raw_no_punct。"""
 from __future__ import annotations
 
 import json
@@ -13,7 +13,7 @@ from opencc import OpenCC
 
 REPO = "https://raw.githubusercontent.com/garychowcmu/daizhigev20/master"
 UA = {"User-Agent": "HermesHistoryBot/1.0 (research; public-domain classics)"}
-ACTIVE = Path("/root/projects/text-search/data/辽宋金夏")
+ACTIVE = Path("/root/projects/text-search/data/辽宋夏金")
 RAW = Path("/root/projects/text-search/data/_raw_no_punct")
 META_PATH = Path("/root/projects/text-search/data/books_meta.json")
 MIN_PUNCT = 80

@@ -3,7 +3,7 @@
 
 用法:
   python3 scripts/normalize_variants.py            # 全活跃库
-  python3 scripts/normalize_variants.py data/辽宋金夏/大金国志.txt
+  python3 scripts/normalize_variants.py data/辽宋夏金/大金国志.txt
   python3 scripts/normalize_variants.py --dry-run
 """
 from __future__ import annotations

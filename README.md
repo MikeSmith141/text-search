@@ -64,11 +64,10 @@ python3 -u server.py 8899
 | **秦汉** | 0（占位） | — | — |
 | **魏晋南北朝** | 0（占位） | — | — |
 | **隋唐五代** | 0（占位） | — | — |
-| **辽宋金夏** | 13 部 | 宋史、辽史、金史、三朝北盟会编、建炎以来系年要录、续资治通鉴长编（及拾补）、契丹国志、金史纪事本末…… | ~53 MB |
-| **元** | 0（占位） | — | — |
+| **辽宋夏金** | 14 部 | 宋史、辽史、金史、三朝北盟会编、建炎以来系年要录、续资治通鉴长编（及拾补）、大金国志、契丹国志…… | ~53 MB |
+| **蒙元** | 10 部 | 元史、新元史、蒙古秘史、元朝秘史、圣武亲征录、蒙鞑备录、黑鞑事略、马可波罗行纪…… | ~12 MB |
 | **明** | 0（占位） | — | — |
 | **清** | 0（占位） | — | — |
-| **民国** | 0（占位） | — | — |
 | **隔离区** | `_raw_no_punct/*.txt` | 大金国志、东都事略、宋史纪事本末、七国考、路史、绎史（原料）…… | ~16 MB |
 | **总计（活跃）** | **~85 部** | 简体+有标点 | **~105 MB** |
 
@@ -224,7 +223,7 @@ python3 scripts/normalize_variants.py --dry-run  # 只统计
 | [`scripts/wait_and_ingest_punct.py`](scripts/wait_and_ingest_punct.py) | 标点完成 → t2s → 入库 |
 | [`scripts/fetch_punctuated.py`](scripts/fetch_punctuated.py) | Wikisource 有标点本拉取 |
 | [`scripts/fetch_missing_classics.py`](scripts/fetch_missing_classics.py) | 缺书批量补齐（殆知阁等） |
-| [`scripts/fetch_liaosong_batch.py`](scripts/fetch_liaosong_batch.py) | 辽宋金夏正史/国志批次 |
+| [`scripts/fetch_liaosong_batch.py`](scripts/fetch_liaosong_batch.py) | 辽宋夏金正史/国志批次 |
 | [`scripts/fetch_shiji_full.py`](scripts/fetch_shiji_full.py) | 史记完整拉取 |
 | [`scripts/queue_dajin_guozhi_punct.py`](scripts/queue_dajin_guozhi_punct.py) | 大金国志单书标点队列 |
 | [`scripts/queue_liaosong_punct.py`](scripts/queue_liaosong_punct.py) | 辽宋批量标点队列 |
@@ -260,7 +259,7 @@ text-search/
 ├── README.md
 ├── data/
 │   ├── books_meta.json     # 113 条书目的 era / author
-│   ├── 先秦/ … 民国/       # 活跃语料（简体+有标点）
+│   ├── 先秦/ … 蒙元/ … 清/       # 活跃语料（简体+有标点）
 │   │   └── *.txt
 │   ├── _raw_no_punct/      # 原始文本备份（繁体/无标点）
 │   │   └── *.txt           # 16 文件，~16 MB
@@ -311,7 +310,7 @@ text-search/
 ### 2026-07-17（初版入库）
 
 - 建成可检索 Web：时期/书筛选、OR/AND 时代排序、阅读器、书名模式
-- 入库先秦 ~72 部 + 辽宋金夏 ~13 部正史/编年/会编
+- 入库先秦 ~72 部 + 辽宋夏金 ~13 部正史/编年/会编
 - 用户 epub/txt 优先清洗（长编、要录、会编）
 - 修复：limit 硬截断假 total → 真实总数分页
 - 书组收起 / 展开全部书

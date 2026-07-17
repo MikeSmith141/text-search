@@ -18,7 +18,7 @@
 ```bash
 cd /path/to/text-search
 python3 scripts/normalize_variants.py                 # 全活跃 data/<时期>/*.txt
-python3 scripts/normalize_variants.py data/辽宋金夏/大金国志.txt
+python3 scripts/normalize_variants.py data/辽宋夏金/大金国志.txt
 python3 scripts/normalize_variants.py --dry-run       # 只统计
 ```
 

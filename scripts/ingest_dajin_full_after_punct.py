@@ -23,7 +23,7 @@ from resegment_annots import resegment  # noqa: E402
 PUNCT_PATH = Path("/tmp/大金国志_to_punct.txt")
 PUNCT_LOG = Path("/tmp/dajin_punct.log")
 RAW_KEEP = ROOT / "data" / "_raw_no_punct" / "大金国志.txt"
-ACTIVE = ROOT / "data" / "辽宋金夏" / "大金国志.txt"
+ACTIVE = ROOT / "data" / "辽宋夏金" / "大金国志.txt"
 META_PATH = ROOT / "data" / "books_meta.json"
 LOG = ROOT / "logs" / "dajin_full_ingest.log"
 WATCH_PID = int(sys.argv[1]) if len(sys.argv) > 1 else None

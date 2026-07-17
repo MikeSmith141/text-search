@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""等当前 auto_punctuate 结束后，给辽宋金夏 raw 无标点书排队标点并入库。"""
+"""等当前 auto_punctuate 结束后，给辽宋夏金 raw 无标点书排队标点并入库。"""
 from __future__ import annotations
 
 import json
@@ -15,7 +15,7 @@ from opencc import OpenCC
 WATCH_PID = int(sys.argv[1]) if len(sys.argv) > 1 else 3418750
 ROOT = Path("/root/projects/text-search")
 RAW = ROOT / "data" / "_raw_no_punct"
-ACTIVE = ROOT / "data" / "辽宋金夏"
+ACTIVE = ROOT / "data" / "辽宋夏金"
 META_PATH = ROOT / "data" / "books_meta.json"
 LOG = ROOT / "logs" / "liaosong_punct_queue.log"
 BOOKS = [
