@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# Runtime / local only
+logs/
+*.log
+nohup.out
+
+# Quarantine & caches (large / intermediate — not active corpus)
+data/_raw_no_punct/
+data/_cache/
+
+# Editor / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Local experiment stubs (kept out of repo root noise)
+wikisource_test*.py
+wikisource_search*.py
+wikisource_prefix.py
+wikisource_download.py
+
+# Duplicate legacy UI at project root (canonical is static/index.html)
+/index.html

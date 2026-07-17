@@ -1,0 +1,1233 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<title>史料检索</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#f5f0e8;--surface:#fffcf5;--border:#d4c9b8;--text:#3d3229;--muted:#8a7e72;
+  --accent:#8b5e3c;--gold:#b8860b;--goldbg:#f0e0b0;--match:#fde68a;
+  --safe-b:env(safe-area-inset-bottom,0px);--safe-t:env(safe-area-inset-top,0px);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);
+  font-family:-apple-system,"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  -webkit-tap-highlight-color:transparent}
+body{overflow-x:hidden}
+
+/* 顶栏 */
+.top{position:sticky;top:0;z-index:30;background:var(--surface);
+  border-bottom:1px solid var(--border);padding:calc(8px + var(--safe-t)) 10px 8px}
+.row{display:flex;align-items:center;gap:6px}
+.logo{font-size:16px;font-weight:700;white-space:nowrap;flex-shrink:0}
+.search{flex:1;display:flex;gap:6px;min-width:0}
+.search input{flex:1;min-width:0;height:40px;padding:0 12px;font-size:16px;
+  border:2px solid var(--border);border-radius:10px;background:var(--bg);color:var(--text);
+  outline:none;-webkit-appearance:none}
+.search input:focus{border-color:var(--gold);background:#fff}
+.mode-row{display:flex;gap:6px;margin-top:8px}
+.mode-btn{flex:1;height:34px;border:1px solid var(--border);border-radius:10px;
+  background:var(--bg);color:var(--text);font-size:13px;font-weight:600;
+  touch-action:manipulation}
+.mode-btn.on{background:var(--gold);border-color:var(--gold);color:#fff}
+.mode-btn:active{opacity:.85}
+.btn{height:40px;border:none;border-radius:10px;font-size:14px;font-weight:600;
+  padding:0 14px;touch-action:manipulation;flex-shrink:0}
+.btn-gold{background:var(--gold);color:#fff}
+.btn:active{opacity:.85}
+.stats{margin-top:6px;font-size:12px;color:var(--muted);
+  display:flex;justify-content:space-between;gap:8px}
+.stats b{color:var(--gold);font-weight:700}
+
+/* 可折叠时期筛选 */
+.period-box{margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.period-head{display:flex;align-items:center;gap:8px;padding:10px 12px;touch-action:manipulation}
+.period-head:active{background:rgba(184,134,11,.08)}
+.period-head .title{font-size:13px;font-weight:600;color:var(--text)}
+.period-head .summary{flex:1;min-width:0;font-size:12px;color:var(--muted);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.period-head .arrow{font-size:12px;color:var(--gold);transition:transform .2s}
+.period-box.open .period-head .arrow{transform:rotate(180deg)}
+.period-body{display:none;padding:0 10px 10px;border-top:1px solid var(--border)}
+.period-box.open .period-body{display:block}
+.period-tools{display:flex;justify-content:flex-end;gap:12px;padding:8px 2px;flex-wrap:wrap}
+.period-tools button{border:none;background:none;color:var(--gold);font-size:12px;font-weight:600;touch-action:manipulation}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:7px 11px;border-radius:999px;
+  border:1px solid var(--border);background:var(--surface);color:var(--text);font-size:13px;
+  line-height:1;touch-action:manipulation;user-select:none;white-space:nowrap}
+.chip.on{background:var(--gold);border-color:var(--gold);color:#fff}
+.chip .n{font-size:11px;opacity:.75}
+.chip:active{opacity:.85}
+
+/* 史料勾选（按时期分组） */
+.book-filter{margin-top:10px;max-height:42vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.book-filter-empty{font-size:12px;color:var(--muted);padding:6px 2px}
+.bf-period{border:1px solid var(--border);border-radius:10px;background:var(--surface);margin-bottom:8px;overflow:hidden}
+.bf-period-h{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--goldbg);border-bottom:1px solid var(--border)}
+.bf-period-h .nm{font-size:13px;font-weight:700;color:var(--accent)}
+.bf-period-h .meta{flex:1;font-size:11px;color:var(--muted)}
+.bf-period-h button{border:none;background:none;color:var(--gold);font-size:11px;font-weight:600;touch-action:manipulation}
+.bf-list{padding:6px 8px 8px;display:flex;flex-direction:column;gap:4px}
+.bf-item{display:flex;align-items:flex-start;gap:8px;padding:7px 6px;border-radius:8px;touch-action:manipulation}
+.bf-item:active{background:rgba(184,134,11,.08)}
+.bf-item input{width:18px;height:18px;margin-top:1px;flex-shrink:0;accent-color:var(--gold)}
+.bf-item .info{flex:1;min-width:0}
+.bf-item .label{font-size:13px;line-height:1.35;color:var(--text);word-break:break-all}
+.bf-item .sub{font-size:11px;color:var(--muted);margin-top:2px}
+.bf-item.off .label{color:var(--muted)}
+
+/* 内容 */
+.main{padding:8px 10px calc(24px + var(--safe-b))}
+.empty{padding:60px 16px;text-align:center;color:var(--muted)}
+.empty .i{font-size:42px;opacity:.35;margin-bottom:10px}
+.empty p{font-size:14px;line-height:1.7}
+.sub{font-size:12px;margin-top:4px}
+
+/* 结果卡片 / 按书分组 */
+.card{background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;margin-bottom:8px;overflow:hidden}
+.card-h{display:flex;align-items:center;gap:6px;padding:8px 10px;
+  background:var(--goldbg);border-bottom:1px solid var(--border);font-size:12px;flex-wrap:wrap}
+.book{font-weight:700;color:var(--accent);max-width:72%;line-height:1.35;white-space:normal}
+.period{color:var(--muted);flex-shrink:0}
+.ln{margin-left:auto;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
+.card-b{padding:8px 10px;touch-action:manipulation}
+.card-b:active{background:#faf6ee}
+.ctx{display:flex;gap:6px;align-items:baseline;font-size:12px;line-height:1.45;
+  font-family:ui-monospace,SFMono-Regular,Menlo,"Noto Sans SC",monospace;padding:1px 0}
+.ctx.cur{background:#fef9e7;border-radius:4px;margin:0 -4px;padding:2px 4px}
+.arr{width:14px;color:transparent;flex-shrink:0}
+.ctx.cur .arr{color:var(--gold)}
+.num{min-width:2.4em;text-align:right;color:var(--muted);font-size:11px;flex-shrink:0}
+.txt{flex:1;white-space:pre-wrap;word-break:break-all}
+mark{background:var(--match);padding:0 2px;border-radius:2px}
+.card-actions{display:flex;gap:10px;padding:0 10px 10px}
+.card-actions button{border:none;background:none;color:var(--gold);font-size:12px;font-weight:600;touch-action:manipulation;padding:4px 0}
+.card-actions button:active{opacity:.7}
+
+.book-group{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:10px;overflow:hidden}
+.book-group-h{padding:10px 12px;background:var(--goldbg);border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.book-group-h .bg-info{flex:1;min-width:0;touch-action:manipulation}
+.book-group-h .bg-info:active{opacity:.85}
+.book-group-title{font-size:14px;font-weight:700;color:var(--accent);line-height:1.4}
+.book-group-meta{font-size:11px;color:var(--muted);margin-top:3px}
+.book-group-actions{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex-shrink:0}
+.book-group-actions button{border:none;background:none;color:var(--gold);font-size:12px;font-weight:600;touch-action:manipulation;padding:4px 0;white-space:nowrap}
+.book-group-actions button:active{opacity:.7}
+.book-group-actions .read-all{border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:5px 10px}
+.book-group.collapsed .book-group-h{border-bottom:none}
+.book-group.collapsed .book-group-b{display:none}
+.book-group-b{padding:0}
+.hit{border-bottom:1px solid var(--border)}
+.hit:last-child{border-bottom:none}
+.hit-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 12px 0}
+.hit-h .ln{margin-left:0;font-size:12px;color:var(--muted)}
+.hit-actions{display:flex;gap:10px}
+.hit-actions button{border:none;background:none;color:var(--gold);font-size:12px;font-weight:600;touch-action:manipulation;padding:4px 0}
+.hit-actions button:active{opacity:.7}
+.hit .card-b{padding-top:6px}
+
+/* 加载更多 */
+.load-more-wrap{padding:12px 8px 20px;text-align:center}
+.load-more-btn{width:100%;max-width:420px;height:44px;border:1px solid var(--border);
+  border-radius:12px;background:var(--surface);color:var(--accent);font-size:14px;font-weight:700;
+  touch-action:manipulation}
+.load-more-btn:active{opacity:.85}
+.load-more-btn:disabled{opacity:.55}
+.load-more-tip{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
+
+/* 全文阅读器 */
+.reader-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
+.reader-mask.show{display:block}
+.reader{
+  position:fixed;left:0;right:0;top:0;bottom:0;z-index:51;
+  background:var(--surface);display:flex;flex-direction:column;
+  transform:translateY(100%);transition:transform .28s ease;
+}
+.reader.open{transform:translateY(0)}
+.reader-h{flex-shrink:0;padding:calc(8px + var(--safe-t)) 12px 8px;
+  border-bottom:1px solid var(--border);background:var(--surface)}
+.reader-top{display:flex;align-items:center;gap:8px}
+.reader-top .back{border:1px solid var(--border);background:var(--bg);border-radius:10px;
+  height:36px;padding:0 12px;font-size:14px;color:var(--text);touch-action:manipulation}
+.reader-top .meta{flex:1;min-width:0}
+.reader-top .meta .t{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.reader-top .meta .s{font-size:11px;color:var(--muted);margin-top:2px}
+.reader-tools{display:flex;gap:6px;margin-top:8px;align-items:center;flex-wrap:wrap}
+.reader-tools .jump{font-size:12px;color:var(--muted);flex:1;min-width:120px}
+.reader-tools button{border:none;background:var(--goldbg);color:var(--accent);border-radius:8px;
+  height:30px;padding:0 10px;font-size:12px;font-weight:600;touch-action:manipulation}
+.reader-tools button:active{opacity:.85}
+.reader-tools .jump-box{display:flex;align-items:center;gap:4px}
+.reader-tools .jump-box input{width:64px;height:30px;border:1px solid var(--border);border-radius:8px;
+  padding:0 8px;font-size:14px;background:var(--bg);color:var(--text);-webkit-appearance:none}
+.reader-progress{height:3px;background:var(--border);margin-top:8px;border-radius:2px;overflow:hidden}
+.reader-progress > i{display:block;height:100%;width:0;background:var(--gold);transition:width .15s}
+.reader-b{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:10px 12px calc(20px + var(--safe-b))}
+.rline{display:flex;gap:8px;align-items:flex-start;padding:3px 4px;border-radius:6px;
+  font-size:var(--reader-fs,15px);line-height:1.8}
+.rline .rn{min-width:2.6em;text-align:right;color:var(--muted);font-size:11px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;padding-top:5px;flex-shrink:0;user-select:none}
+.rline .rt{flex:1;white-space:pre-wrap;word-break:break-all}
+.rline.hit{background:#fef3c7;box-shadow:inset 3px 0 0 var(--gold)}
+.rline.kw{background:#fff8e8}
+.rline.hit mark,.rline.kw mark{background:#fbbf24}
+.reader-chunk-tip{text-align:center;padding:10px;color:var(--muted);font-size:12px}
+.reader-chunk-tip button{border:1px solid var(--border);background:var(--bg);border-radius:8px;
+  height:34px;padding:0 14px;font-size:12px;color:var(--accent);margin:0 4px;touch-action:manipulation}
+
+/* 书目阅读按钮 */
+.bf-item .read-btn{border:none;background:var(--goldbg);color:var(--accent);border-radius:8px;
+  height:28px;padding:0 8px;font-size:11px;font-weight:600;flex-shrink:0;touch-action:manipulation;margin-top:0}
+.book-group-h .read-all{border:none;background:var(--surface);color:var(--gold);border:1px solid var(--border);
+  border-radius:8px;height:30px;padding:0 10px;font-size:12px;font-weight:600;flex-shrink:0;touch-action:manipulation;white-space:nowrap}
+
+/* 书名检索结果卡 */
+.title-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;padding:12px;display:flex;gap:10px;align-items:flex-start}
+.title-card .info{flex:1;min-width:0}
+.title-card .name{font-size:15px;font-weight:700;color:var(--accent);line-height:1.4}
+.title-card .meta{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.5}
+.title-card .read-full{border:none;background:var(--gold);color:#fff;border-radius:10px;
+  height:36px;padding:0 14px;font-size:13px;font-weight:600;flex-shrink:0;touch-action:manipulation;white-space:nowrap}
+.title-card .read-full:active{opacity:.85}
+
+/* 阅读器内书内检索 */
+.reader-search{display:flex;gap:6px;margin-top:8px;align-items:center}
+.reader-search input{flex:1;min-width:0;height:34px;padding:0 10px;font-size:14px;
+  border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);
+  outline:none;-webkit-appearance:none}
+.reader-search input:focus{border-color:var(--gold)}
+.reader-search button{border:none;background:var(--gold);color:#fff;border-radius:8px;
+  height:34px;padding:0 12px;font-size:12px;font-weight:600;touch-action:manipulation;flex-shrink:0}
+.reader-search .rs-clear{background:var(--goldbg);color:var(--accent)}
+
+@media(min-width:860px){
+  .top-inner,.main{max-width:1100px;margin:0 auto}
+  .reader{left:50%;right:auto;width:min(900px,100vw);transform:translate(-50%,100%)}
+  .reader.open{transform:translate(-50%,0)}
+}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="top-inner">
+    <div class="row">
+      <div class="logo">📜 检索</div>
+      <div class="search">
+        <input id="q" type="search" placeholder="/ =任一  + =同时  如 无恤/毋恤  无恤+伯鲁" enterkeyhint="search" autocomplete="off">
+        <button class="btn btn-gold" id="go">搜</button>
+      </div>
+    </div>
+    <div class="mode-row" id="modeRow">
+      <button type="button" class="mode-btn on" data-mode="fulltext" id="modeFull">全文检索</button>
+      <button type="button" class="mode-btn" data-mode="title" id="modeTitle">书名检索</button>
+    </div>
+
+    <div class="period-box" id="periodBox">
+      <div class="period-head" id="periodHead">
+        <span class="title">筛选范围</span>
+        <span class="summary" id="periodSummary">加载中…</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="period-body">
+        <div class="period-tools">
+          <button type="button" id="toggleAll">全选时期</button>
+          <button type="button" id="onlyHasBook">仅有书时期</button>
+          <button type="button" id="selectAllBooks">全选史料</button>
+          <button type="button" id="clearBooks">清空史料</button>
+        </div>
+        <div class="chips" id="chips"></div>
+        <div class="book-filter" id="bookFilter"></div>
+      </div>
+    </div>
+
+    <div class="stats"><span id="stL">准备就绪</span><span id="stR"></span></div>
+  </div>
+</div>
+
+<div class="main" id="results">
+  <div class="empty">
+    <div class="i">📖</div>
+    <p><strong>史料检索就绪</strong></p>
+    <p class="sub">可切换「全文检索 / 书名检索」· 展开筛选范围勾选史料<br>
+      全文：<strong>/</strong>=任一 · <strong>+</strong>=同时　书名：搜「史记」直接找书<br>
+      打开全书后，可在阅读器内再搜本书</p>
+  </div>
+</div>
+
+<div class="reader-mask" id="readerMask"></div>
+<div class="reader" id="reader">
+  <div class="reader-h">
+    <div class="reader-top">
+      <button class="back" id="readerBack" type="button">← 返回</button>
+      <div class="meta">
+        <div class="t" id="readerTitle">全文</div>
+        <div class="s" id="readerSub"></div>
+      </div>
+    </div>
+    <div class="reader-tools">
+      <span class="jump" id="readerJumpInfo"></span>
+      <button type="button" id="prevHit">上一处</button>
+      <button type="button" id="nextHit">下一处</button>
+      <button type="button" id="fontSmaller">A-</button>
+      <button type="button" id="fontBigger">A+</button>
+      <span class="jump-box">
+        <input id="jumpLine" type="number" min="1" inputmode="numeric" placeholder="行号">
+        <button type="button" id="jumpGo">跳转</button>
+      </span>
+    </div>
+    <div class="reader-search">
+      <input id="readerQ" type="search" placeholder="在本书中检索  支持 / + " enterkeyhint="search" autocomplete="off">
+      <button type="button" id="readerSearchGo">搜本书</button>
+      <button type="button" class="rs-clear" id="readerSearchClear">清空</button>
+    </div>
+    <div class="reader-progress"><i id="readerProgressBar"></i></div>
+  </div>
+  <div class="reader-b" id="readerBody"></div>
+</div>
+
+<script>
+const FIXED_PERIODS = ['先秦','秦汉','魏晋南北朝','隋唐五代','辽宋金夏','元','明','清','民国'];
+const state = {
+  periods: [],
+  selected: new Set(),          // 选中的时期
+  selectedBooks: new Set(),     // 选中的史料 key: 时期/书名
+  expanded: new Set(),          // 单条命中「展开前后文」
+  collapsedBooks: new Set(),    // 书组 key period||book：收起该书全部命中
+  lastData: null,
+  loading: false,
+  loadingMore: false,
+  searchMode: 'fulltext',       // fulltext | title
+  pageLimit: 1000,              // 每页条数（避免 200 硬截断把后排书挤掉）
+  // reader
+  readerOpen: false,
+  readerLines: [],
+  readerHits: [],
+  readerHitIdx: -1,
+  readerKeywords: [],
+  readerTerms: [],       // [[alt,...], ...] 与搜索 terms 一致，供上一处/下一处
+  readerTargetLine: 1,
+  readerMeta: null,
+  readerFont: 15,
+  readerWindow: 400,   // 大书分段渲染窗口（行）
+  readerCenter: 1,     // 当前窗口中心行
+};
+
+const $ = id => document.getElementById(id);
+const q=$('q'), go=$('go'), stL=$('stL'), stR=$('stR'), results=$('results');
+const periodBox=$('periodBox'), periodHead=$('periodHead'), periodSummary=$('periodSummary');
+const chips=$('chips'), toggleAll=$('toggleAll'), onlyHasBook=$('onlyHasBook');
+const selectAllBooks=$('selectAllBooks'), clearBooks=$('clearBooks'), bookFilter=$('bookFilter');
+const reader=$('reader'), readerMask=$('readerMask'), readerBody=$('readerBody');
+const readerTitle=$('readerTitle'), readerSub=$('readerSub'), readerJumpInfo=$('readerJumpInfo');
+const readerBack=$('readerBack'), prevHit=$('prevHit'), nextHit=$('nextHit');
+const fontSmaller=$('fontSmaller'), fontBigger=$('fontBigger');
+const jumpLine=$('jumpLine'), jumpGo=$('jumpGo'), readerProgressBar=$('readerProgressBar');
+const modeFull=$('modeFull'), modeTitle=$('modeTitle');
+const readerQ=$('readerQ'), readerSearchGo=$('readerSearchGo'), readerSearchClear=$('readerSearchClear');
+
+function setSearchMode(mode){
+  state.searchMode = mode === 'title' ? 'title' : 'fulltext';
+  if (modeFull) modeFull.classList.toggle('on', state.searchMode === 'fulltext');
+  if (modeTitle) modeTitle.classList.toggle('on', state.searchMode === 'title');
+  if (q) {
+    q.placeholder = state.searchMode === 'title'
+      ? '书名/作者  如 史记  左传/国语'
+      : '/ =任一  + =同时  如 无恤/毋恤  无恤+伯鲁';
+  }
+}
+
+periodHead.onclick = () => periodBox.classList.toggle('open');
+
+function countOf(name){
+  const p = state.periods.find(x => x.name === name);
+  return p ? (p.total_books || 0) : 0;
+}
+function booksOf(name){
+  const p = state.periods.find(x => x.name === name);
+  return p ? (p.books || []) : [];
+}
+function bookKey(period, bookName){
+  return period + '/' + bookName;
+}
+function allBookKeys(periodNames){
+  const keys = [];
+  for (const pn of periodNames) {
+    for (const b of booksOf(pn)) {
+      const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
+      if (name) keys.push(bookKey(pn, name));
+    }
+  }
+  return keys;
+}
+function syncBooksWithPeriods(){
+  // 取消时期时，去掉该时期下已选书；新选时期默认全选其书
+  const keep = new Set();
+  for (const key of state.selectedBooks) {
+    const period = key.split('/')[0];
+    if (state.selected.has(period)) keep.add(key);
+  }
+  for (const pn of state.selected) {
+    const books = booksOf(pn);
+    if (!books.length) continue;
+    const existing = books.some(b => keep.has(bookKey(pn, b.name || '')));
+    if (!existing) {
+      // 该时期刚勾上，或之前没有书选中 → 默认全选该时期书
+      for (const b of books) {
+        const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
+        if (name) keep.add(bookKey(pn, name));
+      }
+    } else {
+      // 已有部分选择，保留
+    }
+  }
+  // 若某时期在 selected 里但 keep 里没有该书（用户清空了），不强制回填
+  // 上面 existing 逻辑：若用户主动清空某时期全部书，existing=false 会全选回来——
+  // 改为：仅当该时期完全没有任何 key 且是「新加入」时全选。这里用简单策略：
+  // 只要时期被选中且 keep 中该时期 0 本，则全选该时期。
+  for (const pn of state.selected) {
+    const hasAny = [...keep].some(k => k.startsWith(pn + '/'));
+    if (!hasAny) {
+      for (const b of booksOf(pn)) {
+        const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
+        if (name) keep.add(bookKey(pn, name));
+      }
+    }
+  }
+  state.selectedBooks = keep;
+}
+
+function renderSummary(){
+  const n = FIXED_PERIODS.length;
+  const s = state.selected.size;
+  const b = state.selectedBooks.size;
+  if (!s) {
+    periodSummary.textContent = '未选择时期';
+  } else {
+    const ptxt = s === n ? `全部时期` : `${s}/${n} 时期`;
+    periodSummary.textContent = `${ptxt} · ${b} 部史料`;
+  }
+  toggleAll.textContent = s === n ? '取消全选时期' : '全选时期';
+}
+
+function renderChips(){
+  chips.innerHTML = FIXED_PERIODS.map(name => {
+    const on = state.selected.has(name) ? 'on' : '';
+    const n = countOf(name);
+    return `<button type="button" class="chip ${on}" data-p="${name}">${name}<span class="n">${n}</span></button>`;
+  }).join('');
+  chips.querySelectorAll('.chip').forEach(el => {
+    el.onclick = (e) => {
+      e.stopPropagation();
+      const p = el.dataset.p;
+      if (state.selected.has(p)) {
+        state.selected.delete(p);
+        // 去掉该时期书
+        state.selectedBooks = new Set([...state.selectedBooks].filter(k => !k.startsWith(p + '/')));
+      } else {
+        state.selected.add(p);
+        // 默认勾上该时期全部书
+        for (const b of booksOf(p)) {
+          const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
+          if (name) state.selectedBooks.add(bookKey(p, name));
+        }
+      }
+      renderChips();
+      renderBookFilter();
+    };
+  });
+  renderSummary();
+}
+
+function renderBookFilter(){
+  const selectedPeriods = FIXED_PERIODS.filter(p => state.selected.has(p));
+  if (!selectedPeriods.length) {
+    bookFilter.innerHTML = `<div class="book-filter-empty">先勾选上方时期，再选具体史料</div>`;
+    renderSummary();
+    return;
+  }
+  const blocks = [];
+  for (const pn of selectedPeriods) {
+    const books = booksOf(pn);
+    if (!books.length) {
+      blocks.push(`<div class="bf-period"><div class="bf-period-h"><span class="nm">${pn}</span><span class="meta">暂无史料</span></div></div>`);
+      continue;
+    }
+    const selectedIn = books.filter(b => state.selectedBooks.has(bookKey(pn, b.name || ''))).length;
+    const items = books.map(b => {
+      const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
+      const key = bookKey(pn, name);
+      const checked = state.selectedBooks.has(key) ? 'checked' : '';
+      const off = checked ? '' : 'off';
+      const label = b.label || name;
+      const sub = [b.era ? `[${b.era}]` : '', b.author || '', b.size_str || ''].filter(Boolean).join(' · ');
+      const file = b.file || (name + '.txt');
+      return `<label class="bf-item ${off}">
+        <input type="checkbox" data-key="${key}" ${checked}>
+        <span class="info"><span class="label">${label}</span>${sub ? `<div class="sub">${sub}</div>` : ''}</span>
+        <button type="button" class="read-btn" data-read-period="${pn}" data-read-file="${file}" data-read-label="${(label||'').replace(/"/g,'&quot;')}" data-read-era="${b.era||''}" data-read-author="${b.author||''}">阅读</button>
+      </label>`;
+    }).join('');
+    blocks.push(`<div class="bf-period" data-period="${pn}">
+      <div class="bf-period-h">
+        <span class="nm">${pn}</span>
+        <span class="meta">${selectedIn}/${books.length}</span>
+        <button type="button" data-toggle-period="${pn}">${selectedIn===books.length?'取消全选':'全选'}</button>
+      </div>
+      <div class="bf-list">${items}</div>
+    </div>`);
+  }
+  bookFilter.innerHTML = blocks.join('');
+  bookFilter.querySelectorAll('input[type=checkbox][data-key]').forEach(inp => {
+    inp.onchange = () => {
+      const key = inp.dataset.key;
+      if (inp.checked) state.selectedBooks.add(key);
+      else state.selectedBooks.delete(key);
+      renderBookFilter();
+    };
+  });
+  bookFilter.querySelectorAll('[data-read-period]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openReader({
+        period: btn.dataset.readPeriod,
+        file: btn.dataset.readFile,
+        book: (btn.dataset.readFile || '').replace(/\.(txt|md)$/,''),
+        label: btn.dataset.readLabel || '',
+        era: btn.dataset.readEra || '',
+        author: btn.dataset.readAuthor || '',
+        line: 1,
+      }, []);
+    };
+  });
+  bookFilter.querySelectorAll('[data-toggle-period]').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const pn = btn.dataset.togglePeriod;
+      const books = booksOf(pn);
+      const allOn = books.every(b => state.selectedBooks.has(bookKey(pn, b.name || '')));
+      for (const b of books) {
+        const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
+        if (!name) continue;
+        const key = bookKey(pn, name);
+        if (allOn) state.selectedBooks.delete(key);
+        else state.selectedBooks.add(key);
+      }
+      renderBookFilter();
+    };
+  });
+  renderSummary();
+}
+
+toggleAll.onclick = (e) => {
+  e.stopPropagation();
+  if (state.selected.size === FIXED_PERIODS.length) {
+    state.selected.clear();
+    state.selectedBooks.clear();
+  } else {
+    FIXED_PERIODS.forEach(p => state.selected.add(p));
+    state.selectedBooks = new Set(allBookKeys(FIXED_PERIODS));
+  }
+  renderChips();
+  renderBookFilter();
+};
+
+onlyHasBook.onclick = (e) => {
+  e.stopPropagation();
+  const withBooks = FIXED_PERIODS.filter(n => countOf(n) > 0);
+  state.selected = new Set(withBooks.length ? withBooks : FIXED_PERIODS);
+  state.selectedBooks = new Set(allBookKeys([...state.selected]));
+  renderChips();
+  renderBookFilter();
+};
+
+selectAllBooks.onclick = (e) => {
+  e.stopPropagation();
+  // 仅对当前已选时期全选史料
+  const periods = [...state.selected];
+  if (!periods.length) {
+    // 若没选时期，先选有书时期
+    const withBooks = FIXED_PERIODS.filter(n => countOf(n) > 0);
+    state.selected = new Set(withBooks.length ? withBooks : FIXED_PERIODS);
+  }
+  state.selectedBooks = new Set(allBookKeys([...state.selected]));
+  renderChips();
+  renderBookFilter();
+};
+
+clearBooks.onclick = (e) => {
+  e.stopPropagation();
+  state.selectedBooks.clear();
+  renderBookFilter();
+};
+
+async function loadPeriods(){
+  // 先渲染固定时期，保证立即可用
+  state.selected = new Set(FIXED_PERIODS);
+  renderChips();
+  renderBookFilter();
+  try{
+    const r = await fetch('/api/periods?t=' + Date.now(), {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    state.periods = Array.isArray(data) ? data : [];
+    const withBooks = FIXED_PERIODS.filter(n => countOf(n) > 0);
+    state.selected = new Set(withBooks.length ? withBooks : FIXED_PERIODS);
+    state.selectedBooks = new Set(allBookKeys([...state.selected]));
+    renderChips();
+    renderBookFilter();
+    const books = state.periods.reduce((a,p)=>a+(p.total_books||0),0);
+    stL.textContent = `共 ${books} 部史料 · 点「筛选范围」可勾选时期/书`;
+  }catch(e){
+    stL.textContent = '时期列表加载失败，仍可尝试搜索';
+  }
+}
+
+/** 前端解析 / + 检索式（与后端 parse_query 对齐） */
+function parseQueryClient(query){
+  let q = String(query || '').trim();
+  if (!q) return { terms: [], keywords: [] };
+  q = q.replace(/＋/g, '+').replace(/｜/g, '|');
+  q = q.replace(/\s*([+/|])\s*/g, '$1');
+  q = q.replace(/\s+/g, '+');
+  const terms = [];
+  const flat = [];
+  q.split('+').forEach(part => {
+    part = part.trim();
+    if (!part) return;
+    const alts = part.split(/[/|]/).map(a => a.trim()).filter(Boolean);
+    const seen = new Set();
+    const uniq = [];
+    alts.forEach(a => {
+      if (!seen.has(a)) { seen.add(a); uniq.push(a); }
+    });
+    if (!uniq.length) return;
+    terms.push(uniq);
+    uniq.forEach(a => { if (!flat.includes(a)) flat.push(a); });
+  });
+  return { terms, keywords: flat };
+}
+
+function esc(s){ return String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function highlight(text, keywords){
+  if(!keywords||!keywords.length) return text;
+  const re = new RegExp('(' + keywords.map(esc).join('|') + ')', 'g');
+  return String(text).replace(re, '<mark>$1</mark>');
+}
+
+/** 与后端 line_matches 一致：terms 组间 AND、组内 OR */
+function lineMatchesTerms(line, terms, keywords){
+  const s = String(line || '');
+  if (terms && terms.length) {
+    return terms.every(group => Array.isArray(group) && group.some(alt => alt && s.includes(alt)));
+  }
+  // 无 terms 时退回：扁平关键词全部包含（旧 AND）
+  if (keywords && keywords.length) {
+    return keywords.every(k => k && s.includes(k));
+  }
+  return false;
+}
+
+function collectHits(lines, terms, keywords){
+  const hits = [];
+  if (!lines || !lines.length) return hits;
+  if (!(terms && terms.length) && !(keywords && keywords.length)) return hits;
+  lines.forEach((line, i) => {
+    if (lineMatchesTerms(line, terms, keywords)) hits.push(i + 1);
+  });
+  return hits;
+}
+
+async function doSearch(){
+  const query = q.value.trim();
+  if(!query){
+    results.innerHTML = `<div class="empty"><div class="i">🔍</div><p>输入关键词开始搜索</p></div>`;
+    return;
+  }
+  if(!state.selected.size){
+    results.innerHTML = `<div class="empty"><div class="i">⚠️</div><p>请至少选择一个时期</p><p class="sub">展开顶部「筛选范围」勾选</p></div>`;
+    return;
+  }
+  if(!state.selectedBooks.size){
+    results.innerHTML = `<div class="empty"><div class="i">⚠️</div><p>请至少勾选一部史料</p><p class="sub">在「筛选范围」里勾选具体书名</p></div>`;
+    return;
+  }
+  if(state.loading) return;
+  state.loading = true;
+  state.expanded = new Set();
+  state.collapsedBooks = new Set();
+  const modeLabel = state.searchMode === 'title' ? '书名' : '全文';
+  stL.textContent = `${modeLabel}搜索中…`;
+  stR.textContent = `「${query}」`;
+  try{
+    const periods = [...state.selected].join(',');
+    const books = [...state.selectedBooks].join(',');
+    const limit = state.pageLimit || 1000;
+    const url = `/api/search?q=${encodeURIComponent(query)}&mode=${encodeURIComponent(state.searchMode)}&periods=${encodeURIComponent(periods)}&books=${encodeURIComponent(books)}&context=1&limit=${limit}&offset=0&t=${Date.now()}`;
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    state.lastData = data;
+    renderResults(data);
+  }catch(e){
+    stL.textContent = '请求失败';
+    results.innerHTML = `<div class="empty"><div class="i">❌</div><p>网络错误</p><p class="sub">${e.message}</p></div>`;
+  }finally{
+    state.loading = false;
+  }
+}
+
+async function loadMoreResults(){
+  if(!state.lastData || state.loading || state.loadingMore) return;
+  if(state.lastData.mode === 'title') return;
+  const total = state.lastData.total || 0;
+  const have = (state.lastData.results || []).length;
+  if(have >= total) return;
+  state.loadingMore = true;
+  try{
+    const query = state.lastData.query || q.value.trim();
+    const periods = [...state.selected].join(',');
+    const books = [...state.selectedBooks].join(',');
+    const limit = state.pageLimit || 1000;
+    const url = `/api/search?q=${encodeURIComponent(query)}&mode=fulltext&periods=${encodeURIComponent(periods)}&books=${encodeURIComponent(books)}&context=1&limit=${limit}&offset=${have}&t=${Date.now()}`;
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const more = await r.json();
+    if(more.error) throw new Error(more.error);
+    const merged = {
+      ...state.lastData,
+      ...more,
+      results: [...(state.lastData.results || []), ...(more.results || [])],
+      returned: have + (more.results || []).length,
+      offset: 0,
+      has_more: (have + (more.results || []).length) < (more.total || total),
+      total: more.total || total,
+    };
+    state.lastData = merged;
+    const y = window.scrollY;
+    renderResults(merged);
+    window.scrollTo(0, y);
+  }catch(e){
+    stR.textContent = '加载更多失败: ' + e.message;
+  }finally{
+    state.loadingMore = false;
+  }
+}
+
+function snippetAround(text, keywords, radius = 36) {
+  const s = String(text || '');
+  if (!s) return '';
+  // 找到最早出现的关键词位置
+  let pos = -1, hitLen = 0;
+  for (const k of (keywords || [])) {
+    if (!k) continue;
+    const i = s.indexOf(k);
+    if (i >= 0 && (pos < 0 || i < pos)) {
+      pos = i; hitLen = k.length;
+    }
+  }
+  // 短行直接完整显示
+  if (s.length <= radius * 2 + 12) return s;
+  if (pos < 0) {
+    return s.slice(0, radius * 2) + '…';
+  }
+  const start = Math.max(0, pos - radius);
+  const end = Math.min(s.length, pos + hitLen + radius);
+  return (start > 0 ? '…' : '') + s.slice(start, end) + (end < s.length ? '…' : '');
+}
+
+function renderResults(data){
+  if(data.error){
+    results.innerHTML = `<div class="empty"><div class="i">⚠️</div><p>${data.error}</p></div>`;
+    return;
+  }
+  const list = data.results || [];
+  const total = data.total || 0;
+  const keywords = data.keywords || [];
+  const mode = data.mode || state.searchMode || 'fulltext';
+  if(!total){
+    stL.innerHTML = `<b>0</b> 条结果`;
+    results.innerHTML = `<div class="empty"><div class="i">🔍</div><p>未找到「<strong>${data.query||''}</strong>」</p><p class="sub">${mode==='title'?'试试别的书名/作者，或切到全文检索':'试试其他关键词，或扩大时期范围'}</p></div>`;
+    return;
+  }
+
+  // ===== 书名检索：一书一卡 + 阅读全文 =====
+  if (mode === 'title') {
+    stL.innerHTML = `<b>${total}</b> 部书 · 书名检索`;
+    stR.textContent = `「${data.query||''}」`;
+    results.innerHTML = list.map((r, idx) => {
+      const label = r.label || r.book || '';
+      const meta = [r.period, r.era ? `[${r.era}]` : '', r.author || '', r.size_str || ''].filter(Boolean).join(' · ');
+      return `<div class="title-card">
+        <div class="info">
+          <div class="name">📄 ${highlight(label, keywords)}</div>
+          <div class="meta">${meta}</div>
+        </div>
+        <button type="button" class="read-full" data-title-open="${idx}">📖 阅读全文</button>
+      </div>`;
+    }).join('');
+    results.querySelectorAll('[data-title-open]').forEach(el => {
+      el.onclick = (e) => {
+        e.stopPropagation();
+        const r = list[Number(el.dataset.titleOpen)];
+        if (r) openReader({...r, line: 1}, [], []);
+      };
+    });
+    return;
+  }
+
+  // ===== 全文检索 =====
+  const returned = data.returned != null ? data.returned : list.length;
+  const hasMore = !!data.has_more || returned < total;
+  const books = new Set(list.map(x => x.period + '/' + x.book)).size;
+  const periods = new Set(list.map(x => x.period)).size;
+  if (hasMore) {
+    stL.innerHTML = `<b>${total}</b> 条命中 · 已显示 <b>${returned}</b> · ${books} 部书`;
+  } else {
+    stL.innerHTML = `<b>${total}</b> 条 · ${books} 部书 · ${periods} 个时期`;
+  }
+  stR.textContent = `「${data.query||''}」`;
+
+  // 同一本书的不同命中放在一起；书组按史料时代（标签 [西汉] 等）从早到晚
+  const ERA_ORDER = ['远古','上古','夏','商','西周','西周至春秋','春秋','战国','先秦','秦','西汉','东汉','汉','三国','三国魏','三国蜀','三国吴','西晋','东晋','南朝宋','南朝齐','梁','南朝梁','南朝陈','北魏','东魏','西魏','北齐','北周','魏晋','隋','唐','五代','后梁','后唐','后晋','后汉','后周','辽','北宋','南宋','宋','金','西夏','元','明','清','民国','现代'];
+  const PERIOD_ORDER = ['先秦','秦汉','魏晋南北朝','隋唐五代','辽宋金夏','元','明','清','民国'];
+  const eraRank = (e) => {
+    e = (e || '').trim();
+    if (!e) return 9999;
+    let i = ERA_ORDER.indexOf(e);
+    if (i >= 0) return i;
+    for (let j = 0; j < ERA_ORDER.length; j++) {
+      if (ERA_ORDER[j] && e.includes(ERA_ORDER[j])) return j;
+    }
+    return 9999;
+  };
+  const periodRank = (p) => {
+    const i = PERIOD_ORDER.indexOf(p);
+    return i >= 0 ? i : 999;
+  };
+  const groups = [];
+  const gmap = new Map();
+  list.forEach((r, idx) => {
+    const gk = `${r.period}||${r.book}`;
+    if (!gmap.has(gk)) {
+      const g = { key: gk, period: r.period, book: r.book, label: r.label || r.book, era: r.era, author: r.author, file: r.file, items: [], firstIdx: idx };
+      gmap.set(gk, g);
+      groups.push(g);
+    }
+    gmap.get(gk).items.push({ r, idx });
+  });
+  groups.sort((a, b) => {
+    const d1 = eraRank(a.era) - eraRank(b.era);
+    if (d1 !== 0) return d1;
+    const d2 = periodRank(a.period) - periodRank(b.period);
+    if (d2 !== 0) return d2;
+    return (a.book || '').localeCompare(b.book || '', 'zh');
+  });
+  // 同一本书内：按目录顺序（正文行号从前往后）
+  groups.forEach(g => {
+    g.items.sort((a, b) => (a.r.line || 0) - (b.r.line || 0));
+  });
+
+  // 顶栏：全书结果较多时一键收起/展开全部书组
+  const multiHitGroups = groups.filter(g => g.items.length >= 2).length;
+  if (groups.length >= 2 || multiHitGroups) {
+    const allCollapsed = groups.length > 0 && groups.every(g => state.collapsedBooks.has(g.key));
+    stR.innerHTML = `<button type="button" id="toggleAllBooksBtn" style="border:none;background:none;color:var(--gold);font-size:12px;font-weight:700;touch-action:manipulation;padding:0">${allCollapsed ? '展开全部书' : '收起全部书'}</button>`;
+  }
+
+  let html = groups.map(g => {
+    const gCollapsed = state.collapsedBooks.has(g.key);
+    const n = g.items.length;
+    const hitsHtml = gCollapsed ? '' : g.items.map(({ r, idx }) => {
+      const key = `${r.period}|${r.book}|${r.line}`;
+      const all = r.context || [];
+      const mi = Math.max(0, all.findIndex(c => c.is_match));
+      const matchLine = all[mi] || { line: r.line, text: r.text || '', is_match: true };
+      const isExpanded = state.expanded.has(key);
+      // 默认：只显示命中那一行的整段原文；展开才带前后文
+      const show = isExpanded ? all : [matchLine];
+      const ctx = show.map(c => {
+        const raw = c.text || ' ';
+        // 命中行整段展示；前后文行过长时再截
+        const shown = c.is_match
+          ? raw
+          : (raw.length > 160 ? snippetAround(raw, keywords, 70) : raw);
+        return `<div class="ctx${c.is_match?' cur':''}">
+          <span class="arr">${c.is_match?'👉':''}</span>
+          <span class="num">${c.line}</span>
+          <span class="txt">${highlight(shown, keywords)}</span>
+        </div>`;
+      }).join('');
+      const canExpand = all.length > 1;
+      const moreLabel = isExpanded ? '收起' : `展开前后文(${all.length}行)`;
+      return `<div class="hit${isExpanded?' expanded':''}">
+        <div class="hit-h">
+          <span class="ln">第${r.line}行</span>
+          <div class="hit-actions">
+            <button type="button" data-open="${idx}">📖 打开定位</button>
+            ${canExpand || isExpanded ? `<button type="button" data-more="${key}">${moreLabel}</button>` : ''}
+          </div>
+        </div>
+        <div class="card-b" data-open="${idx}">${ctx}</div>
+      </div>`;
+    }).join('');
+
+    const metaBits = [
+      g.period,
+      `${n} 处命中`,
+      gCollapsed ? '已收起' : '',
+      hasMore ? '（当前页）' : '',
+    ].filter(Boolean).join(' · ');
+    const collapseLabel = gCollapsed ? `▶ 展开 ${n} 条` : (n >= 2 ? `▼ 收起本书` : `▼ 收起`);
+
+    return `<div class="book-group${gCollapsed ? ' collapsed' : ''}" data-gkey="${g.key}">
+      <div class="book-group-h">
+        <div class="bg-info" data-toggle-book="${g.key}" title="点击收起/展开本书结果">
+          <div class="book-group-title">📄 ${g.label}</div>
+          <div class="book-group-meta">${metaBits}</div>
+        </div>
+        <div class="book-group-actions">
+          <button type="button" data-toggle-book="${g.key}">${collapseLabel}</button>
+          <button type="button" class="read-all" data-read-group="${g.firstIdx}">📖 阅读全书</button>
+        </div>
+      </div>
+      <div class="book-group-b">${hitsHtml}</div>
+    </div>`;
+  }).join('');
+
+  if (hasMore) {
+    const remain = Math.max(0, total - returned);
+    html += `<div class="load-more-wrap">
+      <button type="button" class="load-more-btn" id="loadMoreBtn">⬇ 加载更多（还剩 ${remain} 条）</button>
+      <div class="load-more-tip">共 ${total} 条命中；按史料时代排序后分页显示，后排书（如金史）可能在下一页</div>
+    </div>`;
+  }
+  results.innerHTML = html;
+
+  const rerenderKeepScroll = () => {
+    const y = window.scrollY;
+    renderResults(state.lastData);
+    window.scrollTo(0, y);
+  };
+  const toggleBook = (gk) => {
+    if (!gk) return;
+    if (state.collapsedBooks.has(gk)) state.collapsedBooks.delete(gk);
+    else state.collapsedBooks.add(gk);
+    rerenderKeepScroll();
+  };
+
+  results.querySelectorAll('[data-open]').forEach(el => {
+    el.onclick = (e) => {
+      e.stopPropagation();
+      const r = list[Number(el.dataset.open)];
+      if (r) openReader(r, keywords, data.terms || []);
+    };
+  });
+  results.querySelectorAll('[data-read-group]').forEach(el => {
+    el.onclick = (e) => {
+      e.stopPropagation();
+      const r = list[Number(el.dataset.readGroup)];
+      if (r) openReader({...r, line: 1}, keywords, data.terms || []);
+    };
+  });
+  results.querySelectorAll('[data-more]').forEach(el => {
+    el.onclick = (e) => {
+      e.stopPropagation();
+      const k = el.dataset.more;
+      if(state.expanded.has(k)) state.expanded.delete(k); else state.expanded.add(k);
+      rerenderKeepScroll();
+    };
+  });
+  results.querySelectorAll('[data-toggle-book]').forEach(el => {
+    el.onclick = (e) => {
+      e.stopPropagation();
+      toggleBook(el.dataset.toggleBook);
+    };
+  });
+  const toggleAllBtn = document.getElementById('toggleAllBooksBtn');
+  if (toggleAllBtn) {
+    toggleAllBtn.onclick = (e) => {
+      e.stopPropagation();
+      const allCollapsed = groups.length > 0 && groups.every(g => state.collapsedBooks.has(g.key));
+      if (allCollapsed) {
+        state.collapsedBooks = new Set();
+      } else {
+        state.collapsedBooks = new Set(groups.map(g => g.key));
+      }
+      rerenderKeepScroll();
+    };
+  }
+  const loadMoreBtn = document.getElementById('loadMoreBtn');
+  if (loadMoreBtn) {
+    loadMoreBtn.onclick = async () => {
+      loadMoreBtn.disabled = true;
+      loadMoreBtn.textContent = '加载中…';
+      await loadMoreResults();
+    };
+  }
+}
+
+async function openReader(hit, keywords, terms){
+  readerTitle.textContent = hit.label || hit.book || hit.file || '全文';
+  const subParts = [hit.period];
+  if (hit.era) subParts.push(hit.era);
+  if (hit.author) subParts.push(hit.author);
+  if (hit.line) subParts.push(`定位第 ${hit.line} 行`);
+  readerSub.textContent = subParts.join(' · ');
+  readerBody.innerHTML = `<div class="empty"><p>加载全文中…</p></div>`;
+  readerMask.classList.add('show');
+  reader.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  state.readerOpen = true;
+  state.readerKeywords = keywords || [];
+  // terms 优先用入参；否则从上次搜索结果取；再否则用扁平关键词当 AND
+  // 书名检索打开时 keywords/terms 为空，不沿用全局全文检索 terms
+  if (Array.isArray(terms)) {
+    state.readerTerms = terms;
+  } else if (keywords && keywords.length) {
+    state.readerTerms = ((state.lastData && state.lastData.terms) || []);
+  } else {
+    state.readerTerms = [];
+  }
+  if (!state.readerTerms.length && state.readerKeywords.length) {
+    state.readerTerms = state.readerKeywords.map(k => [k]);
+  }
+  state.readerTargetLine = hit.line || 1;
+  state.readerCenter = hit.line || 1;
+  state.readerMeta = hit;
+  applyReaderFont();
+  if (jumpLine) jumpLine.value = String(hit.line || 1);
+  if (readerQ) readerQ.value = (keywords && keywords.length) ? (keywords.join('/') || '') : '';
+
+  try{
+    const file = hit.file || ((hit.book || '') + '.txt');
+    const url = `/api/text?period=${encodeURIComponent(hit.period)}&file=${encodeURIComponent(file)}&t=${Date.now()}`;
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    if(data.error) throw new Error(data.error);
+    if (data.label) readerTitle.textContent = data.label;
+    const sub2 = [data.period || hit.period];
+    if (data.era) sub2.push(data.era);
+    if (data.author) sub2.push(data.author);
+    sub2.push(`共 ${data.total_lines || (data.lines||[]).length} 行`);
+    readerSub.textContent = sub2.join(' · ');
+    state.readerLines = data.lines || [];
+    // 用与搜索相同的 OR/AND 规则收集命中，否则 无恤/毋恤 会得到空列表，上一处/下一处无反应
+    state.readerHits = collectHits(state.readerLines, state.readerTerms, state.readerKeywords);
+    let idx = state.readerHits.indexOf(state.readerTargetLine);
+    if (idx < 0) idx = state.readerHits.length ? 0 : -1;
+    state.readerHitIdx = idx;
+    if (idx >= 0) state.readerTargetLine = state.readerHits[idx];
+    state.readerCenter = state.readerTargetLine;
+    renderReader();
+    requestAnimationFrame(() => {
+      const el = readerBody.querySelector(`[data-line="${state.readerTargetLine}"]`);
+      if (el) el.scrollIntoView({block:'center'});
+      updateReaderProgress();
+    });
+  }catch(e){
+    readerBody.innerHTML = `<div class="empty"><div class="i">❌</div><p>加载全文失败</p><p class="sub">${e.message}</p></div>`;
+  }
+}
+
+function applyReaderFont(){
+  reader.style.setProperty('--reader-fs', state.readerFont + 'px');
+}
+
+function readerWindowRange(){
+  const total = state.readerLines.length;
+  const win = state.readerWindow;
+  if (total <= win) return [0, total];
+  const center = Math.max(1, Math.min(total, state.readerCenter || 1));
+  let start = Math.max(0, center - Math.floor(win / 2) - 1);
+  let end = Math.min(total, start + win);
+  start = Math.max(0, end - win);
+  return [start, end];
+}
+
+function renderReader(){
+  const kws = state.readerKeywords;
+  const terms = state.readerTerms;
+  const target = state.readerTargetLine;
+  const total = state.readerLines.length;
+  const [start, end] = readerWindowRange();
+  readerJumpInfo.textContent = state.readerHits.length
+    ? `命中 ${state.readerHitIdx+1}/${state.readerHits.length} · 第${target}/${total}行`
+    : (kws.length ? `全文 ${total} 行 · 本书无匹配` : `全文 ${total} 行 · 显示 ${start+1}-${end}`);
+  let html = '';
+  if (start > 0) {
+    html += `<div class="reader-chunk-tip">已隐藏前文 1–${start} 行
+      <button type="button" data-load-prev>↑ 加载上文</button>
+      <button type="button" data-load-start>到开头</button></div>`;
+  }
+  for (let i = start; i < end; i++) {
+    const line = state.readerLines[i] || ' ';
+    const ln = i + 1;
+    const isTarget = ln === target;
+    const isKw = !isTarget && lineMatchesTerms(line, terms, kws);
+    html += `<div class="rline${isTarget?' hit':''}${isKw?' kw':''}" data-line="${ln}">
+      <span class="rn">${ln}</span>
+      <span class="rt">${highlight(line, kws)}</span>
+    </div>`;
+  }
+  if (end < total) {
+    html += `<div class="reader-chunk-tip">已隐藏后文 ${end+1}–${total} 行
+      <button type="button" data-load-next>↓ 加载下文</button>
+      <button type="button" data-load-end>到结尾</button></div>`;
+  }
+  readerBody.innerHTML = html || `<div class="empty"><p>无内容</p></div>`;
+  readerBody.querySelectorAll('[data-load-prev]').forEach(b => b.onclick = () => {
+    state.readerCenter = Math.max(1, start - Math.floor(state.readerWindow/2) + 1);
+    renderReader();
+    readerBody.scrollTop = 40;
+  });
+  readerBody.querySelectorAll('[data-load-next]').forEach(b => b.onclick = () => {
+    state.readerCenter = Math.min(total, end + Math.floor(state.readerWindow/2));
+    renderReader();
+    readerBody.scrollTop = 40;
+  });
+  readerBody.querySelectorAll('[data-load-start]').forEach(b => b.onclick = () => {
+    state.readerCenter = 1;
+    renderReader();
+    readerBody.scrollTop = 0;
+  });
+  readerBody.querySelectorAll('[data-load-end]').forEach(b => b.onclick = () => {
+    state.readerCenter = total;
+    renderReader();
+    readerBody.scrollTop = readerBody.scrollHeight;
+  });
+  updateReaderProgress();
+}
+
+function updateReaderProgress(){
+  if (!readerProgressBar) return;
+  const total = state.readerLines.length || 1;
+  // 基于滚动位置 + 窗口中心
+  const maxScroll = Math.max(1, readerBody.scrollHeight - readerBody.clientHeight);
+  const ratioScroll = readerBody.scrollTop / maxScroll;
+  const ratioCenter = (state.readerCenter || 1) / total;
+  const ratio = Math.min(1, Math.max(0, total > state.readerWindow ? ratioCenter * 0.65 + ratioScroll * 0.35 : ratioScroll));
+  readerProgressBar.style.width = (ratio * 100).toFixed(1) + '%';
+}
+
+function jumpToLine(ln){
+  const total = state.readerLines.length;
+  if (!total) return;
+  ln = Math.max(1, Math.min(total, parseInt(ln, 10) || 1));
+  state.readerTargetLine = ln;
+  state.readerCenter = ln;
+  // 若在命中列表中，同步索引
+  const idx = state.readerHits.indexOf(ln);
+  if (idx >= 0) state.readerHitIdx = idx;
+  renderReader();
+  requestAnimationFrame(() => {
+    const el = readerBody.querySelector(`[data-line="${ln}"]`);
+    if (el) el.scrollIntoView({block:'center', behavior:'smooth'});
+    updateReaderProgress();
+  });
+  if (jumpLine) jumpLine.value = String(ln);
+}
+
+function jumpHit(delta){
+  if (!state.readerHits.length) return;
+  let idx = state.readerHitIdx;
+  if (idx < 0) idx = 0;
+  idx = (idx + delta + state.readerHits.length) % state.readerHits.length;
+  state.readerHitIdx = idx;
+  jumpToLine(state.readerHits[idx]);
+}
+
+function applyInBookSearch(){
+  if (!state.readerOpen || !state.readerLines.length) return;
+  const qtext = (readerQ && readerQ.value || '').trim();
+  if (!qtext) {
+    state.readerKeywords = [];
+    state.readerTerms = [];
+    state.readerHits = [];
+    state.readerHitIdx = -1;
+    renderReader();
+    return;
+  }
+  const parsed = parseQueryClient(qtext);
+  state.readerTerms = parsed.terms;
+  state.readerKeywords = parsed.keywords;
+  state.readerHits = collectHits(state.readerLines, state.readerTerms, state.readerKeywords);
+  if (!state.readerHits.length) {
+    state.readerHitIdx = -1;
+    renderReader();
+    if (readerJumpInfo) readerJumpInfo.textContent = `本书无匹配「${qtext}」`;
+    return;
+  }
+  // 优先保留当前行若仍命中，否则跳到第一处
+  let idx = state.readerHits.indexOf(state.readerTargetLine);
+  if (idx < 0) idx = 0;
+  state.readerHitIdx = idx;
+  jumpToLine(state.readerHits[idx]);
+}
+
+function clearInBookSearch(){
+  if (readerQ) readerQ.value = '';
+  state.readerKeywords = [];
+  state.readerTerms = [];
+  state.readerHits = [];
+  state.readerHitIdx = -1;
+  if (state.readerOpen) renderReader();
+}
+
+function closeReader(){
+  reader.classList.remove('open');
+  readerMask.classList.remove('show');
+  state.readerOpen = false;
+  document.body.style.overflow = '';
+}
+
+readerBack.onclick = closeReader;
+readerMask.onclick = closeReader;
+prevHit.onclick = () => jumpHit(-1);
+nextHit.onclick = () => jumpHit(1);
+fontSmaller.onclick = () => {
+  state.readerFont = Math.max(12, state.readerFont - 1);
+  applyReaderFont();
+};
+fontBigger.onclick = () => {
+  state.readerFont = Math.min(24, state.readerFont + 1);
+  applyReaderFont();
+};
+jumpGo.onclick = () => jumpToLine(jumpLine.value);
+jumpLine.addEventListener('keydown', e => {
+  if (e.key === 'Enter') jumpToLine(jumpLine.value);
+});
+if (readerSearchGo) readerSearchGo.onclick = applyInBookSearch;
+if (readerSearchClear) readerSearchClear.onclick = clearInBookSearch;
+if (readerQ) readerQ.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    applyInBookSearch();
+  }
+});
+if (modeFull) modeFull.onclick = () => { setSearchMode('fulltext'); if (q.value.trim()) doSearch(); };
+if (modeTitle) modeTitle.onclick = () => { setSearchMode('title'); if (q.value.trim()) doSearch(); };
+readerBody.addEventListener('scroll', () => {
+  if (!state.readerOpen) return;
+  updateReaderProgress();
+}, {passive:true});
+document.addEventListener('keydown', e => {
+  if (!state.readerOpen) return;
+  if (e.key === 'Escape') closeReader();
+  if (e.key === 'ArrowLeft') jumpHit(-1);
+  if (e.key === 'ArrowRight') jumpHit(1);
+});
+
+go.onclick = doSearch;
+q.addEventListener('keydown', e => { if(e.key==='Enter') doSearch(); });
+setSearchMode('fulltext');
+loadPeriods();
+</script>
+</body>
+</html>
