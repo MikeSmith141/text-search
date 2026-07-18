@@ -1,12 +1,11 @@
 # 📚 史料检索（text-search）
 
-[![Python 3](https://img.shields.io/badge/python-3.8+-blue?logo=python)](https://docs.python.org/3/library/http.server.html) | [![Private](https://img.shields.io/badge/visibility-private-red)](https://github.com/MikeSmith141/text-search) | 零依赖 | 移动端可用
+[![Python 3](https://img.shields.io/badge/python-3.8+-blue?logo=python)](https://docs.python.org/3/library/http.server.html) | 零依赖 | 移动端可用
 
 **零依赖、可自托管的中国古典/史料全文检索 Web 应用。**  
 后端纯 Python 标准库（`http.server`），前端单页 HTML 无框架，数据为 `data/<时期>/<书名>.txt` 扁平文件。  
 手机 / 桌面均可使用；**史料时代排序**、**书级勾选**、**OR/AND 检索**、**全文阅读器**。
 
-> 仓库为 **Private**，语料来源详见 [源与工具](#-源与工具)。
 
 ---
 
@@ -94,7 +93,7 @@ python3 -u server.py 8899
 │   映射表                    │
 │ □ 卷帙 → 检查双卷标之间    │
 │   是否有内容（防假完本）    │
-│ □ 许可 → 公版/用户自备/    │
+│ □ 许可 → 公版/自备整理本/    │
 │   开放API                  │
 └─────────────────────────────┘
        │ 通过? → 3
@@ -203,7 +202,7 @@ python3 scripts/normalize_variants.py --dry-run  # 只统计
 
 | 来源 | 链接 | 用途 |
 |------|------|------|
-| **用户自备**（优先） | — | 购买的中华书局 epub、自行整理的 txt（如长编、要录、会编、战国史料编年辑证等） |
+| **自备整理本**（优先） | — | 购买的中华书局 epub、自行整理的 txt（如长编、要录、会编、战国史料编年辑证等） |
 | **中文维基文库** | [zh.wikisource.org](https://zh.wikisource.org/) | 多卷有标点本，MediaWiki API 分页拉取（带速率限制） |
 | **殆知阁古籍数据库** | [garychowcmu/daizhigev20](https://github.com/garychowcmu/daizhigev20)（GitHub） | 大规模 UTF-8 史部/子部/集部覆盖；常无标点 → 进隔离区须经自动标点 |
 | **Project Gutenberg** | [gutenberg.org](https://www.gutenberg.org/) | 少数短篇公版中文经典 |
@@ -269,7 +268,7 @@ text-search/
 │   ├── _raw_no_punct/      # 原始文本备份（繁体/无标点）
 │   │   └── *.txt           # 35 文件入库，~34 MB
 │   │   ├── clean_backup_*/ # (本地) 去污染前快照，gitignored
-│   │   └── user_upload_*/  # (本地) 用户上传原稿，gitignored
+│   │   └── user_upload_*/  # (本地) 上传整理原稿，gitignored
 │   └── _cache/             # (本地) 开放源缓存，gitignored
 ├── scripts/                # 入库/标点/拉取脚本
 ├── docs/                   # 分段断句 / 异体字库
@@ -326,11 +325,11 @@ text-search/
 
 - 建成可检索 Web：时期/书筛选、OR/AND 时代排序、阅读器、书名模式
 - 入库先秦 ~72 部 + 辽宋夏金 ~13 部正史/编年/会编
-- 用户 epub/txt 优先清洗（长编、要录、会编）
+- 用户 epub/txt 优先清洗（长编、要录、会编 등）
 - 修复：limit 硬截断假 total → 真实总数分页
 - 书组收起 / 展开全部书
 - 会编/要录：异字映射（含 増 等）+ 语义分段
-- 私有 GitHub 仓库初始化 + 全 README
+- GitHub 仓库初始化 + 全 README
 - 原始语料备份上传
 
 ---
@@ -338,7 +337,7 @@ text-search/
 ## 📄 许可与使用声明
 
 - **代码**（`server.py`、`static/`、`scripts/`）：可用于自托管与二次开发。
-- **文本语料**：来源混合（公版、维基文库、用户自备整理本）。**本仓库设为 Private**；转载或公开前请自行确认各书版权与整理本授权。
+- **文本语料**：来源混合（公版、维基文库、自备整理本）。转载或公开前请自行确认各书版权与整理本授权。
 - 检索结果仅供文献检索与研究参考，不构成校勘定本。
 
 ---
