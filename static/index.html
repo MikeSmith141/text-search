@@ -662,7 +662,7 @@ async function doSearch(){
   state.expanded = new Set();
   state.collapsedBooks = new Set();
   const modeLabel = state.searchMode === 'title' ? 'Title' : 'Full text';
-  stL.textContent = `${modeLabel}Searching…`;
+  stL.textContent = `${modeLabel} · searching…`;
   stR.textContent = `「${query}」`;
   try{
     const periods = [...state.selected].join(',');
