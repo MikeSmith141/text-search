@@ -18,17 +18,12 @@ data/_raw_no_punct/clean_backup_*/
 data/_raw_no_punct/user_upload_backup/
 data/_raw_no_punct/**/user_upload*/
 
-# Local-only non-public-domain corpus (never push)
-data/蒙元/蒙古秘史.txt
-data/蒙元/马可波罗行纪.txt
-data/先秦/战国史料编年辑证.txt
-data/先秦/清华简系年.txt
-data/先秦/清华简楚居.txt
+# Local-only private corpus (never push). Use data/_private/ or .git/info/exclude.
 data/_private/
 **/user_private/**
 
 # Note: raw public-domain sources under data/_raw_no_punct/ (*.txt) ARE tracked.
-# Non-public-domain modern editions must stay local-only (listed above).
+# Non-public-domain modern editions must stay local-only.
 
 # Editor / OS
 .DS_Store

@@ -10,6 +10,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(BASE_DIR, 'data')
 STATIC_DIR = os.path.join(BASE_DIR, 'static')
 META_PATH = os.path.join(DATA_DIR, 'books_meta.json')
+META_LOCAL_PATH = os.path.join(DATA_DIR, 'books_meta.local.json')
 PORT = int(sys.argv[1]) if len(sys.argv) > 1 else 8899
 
 MIME = {
@@ -22,12 +23,24 @@ MIME = {
 
 
 def load_meta():
+    """Load public meta, then optional local-only overlay (not for git)."""
+    data = {}
     try:
         with open(META_PATH, 'r', encoding='utf-8') as f:
-            data = json.load(f)
-        return data if isinstance(data, dict) else {}
+            raw = json.load(f)
+        if isinstance(raw, dict):
+            data.update(raw)
     except Exception:
-        return {}
+        pass
+    try:
+        if os.path.exists(META_LOCAL_PATH):
+            with open(META_LOCAL_PATH, 'r', encoding='utf-8') as f:
+                local = json.load(f)
+            if isinstance(local, dict):
+                data.update(local)
+    except Exception:
+        pass
+    return data
 
 
 BOOK_META = load_meta()
