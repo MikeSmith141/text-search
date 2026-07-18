@@ -14,11 +14,13 @@ import sys
 import time
 from pathlib import Path
 
-ROOT = Path("/root/projects/text-search")
+ROOT = ROOT
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from opencc import OpenCC  # noqa: E402
 from resegment_annots import resegment  # noqa: E402
+
+ROOT = Path(__file__).resolve().parents[1]
 
 PUNCT_PATH = Path("/tmp/大金国志_to_punct.txt")
 PUNCT_LOG = Path("/tmp/dajin_punct.log")

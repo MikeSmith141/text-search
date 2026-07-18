@@ -12,8 +12,10 @@ from pathlib import Path
 
 from opencc import OpenCC
 
+ROOT = Path(__file__).resolve().parents[1]
+
 WATCH_PID = int(sys.argv[1]) if len(sys.argv) > 1 else 3418750
-ROOT = Path("/root/projects/text-search")
+ROOT = ROOT
 RAW = ROOT / "data" / "_raw_no_punct"
 ACTIVE = ROOT / "data" / "辽宋夏金"
 META_PATH = ROOT / "data" / "books_meta.json"

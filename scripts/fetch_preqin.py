@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+from pathlib import Path
 """从殆知阁 daizhigev20 下载先秦相关公版古籍到 data/先秦/"""
 import os
 import sys
@@ -6,7 +7,9 @@ import time
 import urllib.parse
 import urllib.request
 
-OUT_DIR = "/root/projects/text-search/data/先秦"
+ROOT = Path(__file__).resolve().parents[1]
+
+OUT_DIR = str(ROOT / "data" / "先秦")
 REPO = "https://raw.githubusercontent.com/garychowcmu/daizhigev20/master"
 UA = "Mozilla/5.0 (compatible; HermesHistoryBot/1.0; research)"
 

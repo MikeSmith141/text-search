@@ -19,11 +19,13 @@ from pathlib import Path
 
 from opencc import OpenCC
 
+ROOT = Path(__file__).resolve().parents[1]
+
 API = "https://zh.wikisource.org/w/api.php"
 UA = {"User-Agent": "HermesHistoryBot/1.0 (research; public-domain classics)"}
-OUT = Path("/root/projects/text-search/data/先秦/史记.txt")
-CACHE = Path("/root/projects/text-search/data/_cache/shiji")
-BAK = Path("/root/projects/text-search/data/_raw_no_punct/史记_old_incomplete.txt")
+OUT = ROOT / "data" / "先秦" / "史记.txt"
+CACHE = ROOT / "data" / "_cache" / "shiji"
+BAK = ROOT / "data" / "_raw_no_punct" / "史记_old_incomplete.txt"
 SLEEP = 6.0
 cc = OpenCC("t2s")
 

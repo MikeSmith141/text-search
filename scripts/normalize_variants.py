@@ -12,7 +12,9 @@ import argparse
 import sys
 from pathlib import Path
 
-DATA = Path("/root/projects/text-search/data")
+ROOT = Path(__file__).resolve().parents[1]
+
+DATA = ROOT / "data"
 
 # 长词优先（多字映射先做）
 MULTI = {

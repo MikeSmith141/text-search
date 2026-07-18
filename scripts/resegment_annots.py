@@ -11,6 +11,8 @@ import re
 import sys
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+
 ANNOT_CHARS = set("【】〈〉")
 
 # 编年体年号干支标：【甲午】【乙未】—— 是叙事年份，不是【按…】类注释
@@ -1853,7 +1855,7 @@ def main():
         files.append(args[i])
         i += 1
     if not files:
-        files = ["/root/projects/text-search/data/先秦/七国考.txt"]
+        files = [str(ROOT / "data" / "先秦" / "七国考.txt")]
         style = "kaoju"
 
     for path in files:

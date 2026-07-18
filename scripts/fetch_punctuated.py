@@ -7,9 +7,11 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
+ROOT = Path(__file__).resolve().parents[1]
+
 API = "https://zh.wikisource.org/w/api.php"
 UA = {"User-Agent": "HermesHistoryBot/1.0 (research; public-domain classics)"}
-OUT = Path("/root/projects/text-search/data/先秦")
+OUT = ROOT / "data" / "先秦"
 
 # 目标书 -> 维基文库抓取策略
 JOBS = {

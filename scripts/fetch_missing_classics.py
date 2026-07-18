@@ -11,11 +11,13 @@ from pathlib import Path
 
 from opencc import OpenCC
 
+ROOT = Path(__file__).resolve().parents[1]
+
 REPO = "https://raw.githubusercontent.com/garychowcmu/daizhigev20/master"
 UA = {"User-Agent": "HermesHistoryBot/1.0 (research; public-domain classics)"}
-OUT = Path("/root/projects/text-search/data/先秦")
-RAW = Path("/root/projects/text-search/data/_raw_no_punct")
-META_PATH = Path("/root/projects/text-search/data/books_meta.json")
+OUT = ROOT / "data" / "先秦"
+RAW = ROOT / "data" / "_raw_no_punct"
+META_PATH = ROOT / "data" / "books_meta.json"
 cc = OpenCC("t2s")
 
 # name -> (rel_path or list of rel_paths to concat, era, author, note)

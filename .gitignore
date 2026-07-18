@@ -40,3 +40,8 @@ wikisource_download.py
 *.bak_*
 **/*.bak_before_*
 data/**/*.bak_before_*
+data/_raw_no_punct/**/user_upload*/
+.env
+.env.*
+**/*.pem
+**/*credentials*

@@ -11,11 +11,13 @@ from pathlib import Path
 
 from opencc import OpenCC
 
+ROOT = Path(__file__).resolve().parents[1]
+
 REPO = "https://raw.githubusercontent.com/garychowcmu/daizhigev20/master"
 UA = {"User-Agent": "HermesHistoryBot/1.0 (research; public-domain classics)"}
-ACTIVE = Path("/root/projects/text-search/data/辽宋夏金")
-RAW = Path("/root/projects/text-search/data/_raw_no_punct")
-META_PATH = Path("/root/projects/text-search/data/books_meta.json")
+ACTIVE = ROOT / "data" / "辽宋夏金"
+RAW = ROOT / "data" / "_raw_no_punct"
+META_PATH = ROOT / "data" / "books_meta.json"
 MIN_PUNCT = 80
 MIN_DENS = 0.02  # 标点密度门槛，低于则当无标点
 
@@ -201,7 +203,7 @@ def main() -> None:
             f"  {row['status']:16} {row['label']} chars={row['chars']} punct={row['punct']} dens={row['dens']}",
             flush=True,
         )
-    (Path("/root/projects/text-search/logs") / "fetch_liaosong_batch.json").write_text(
+    (ROOT / "logs" / "fetch_liaosong_batch.json").write_text(
         json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
     )
 

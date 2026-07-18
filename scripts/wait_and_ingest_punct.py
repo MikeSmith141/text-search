@@ -4,9 +4,11 @@ import os, re, sys, time
 from pathlib import Path
 from opencc import OpenCC
 
+ROOT = Path(__file__).resolve().parents[1]
+
 PID = int(sys.argv[1]) if len(sys.argv) > 1 else 3418750
-LOG = Path('/root/projects/text-search/logs/auto_punctuate.log')
-ACTIVE = Path('/root/projects/text-search/data/先秦')
+LOG = ROOT / "logs" / "auto_punctuate.log"
+ACTIVE = ROOT / "data" / "先秦"
 NAMES = ['七国考.txt', '路史.txt', '绎史.txt']
 cc = OpenCC('t2s')
 
