@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""史料实时检索 v2 - 后端搜索服务"""
+"""Classical text search v2 - backend service"""
 import json
 import os
 import sys
@@ -47,9 +47,9 @@ BOOK_META = load_meta()
 
 
 def book_info(book_name: str) -> dict:
-    """返回书名元信息，并生成展示标签：书名·[时代]·作者"""
+    """Return book meta and display label: title·[era]·author"""
     meta = BOOK_META.get(book_name) or {}
-    # 兼容：史记-秦始皇本纪 这类
+    # compat: title-chapter style stems
     if not meta and '-' in book_name:
         meta = BOOK_META.get(book_name.split('-', 1)[0]) or {}
     era = (meta.get('era') or '').strip()
@@ -78,7 +78,7 @@ def format_size(n: int) -> str:
 
 FIXED_PERIODS = ['先秦', '秦汉', '魏晋南北朝', '隋唐五代', '辽宋夏金', '蒙元', '明', '清']
 
-# 史料本身的时代（标签里的 [西汉] 等），从早到晚
+# source composition era labels, early -> late
 ERA_ORDER = [
     '远古', '上古', '夏', '商', '西周', '西周至春秋', '春秋', '战国', '先秦',
     '秦', '西汉', '东汉', '汉',
@@ -92,7 +92,7 @@ ERA_ORDER = [
 
 
 def era_sort_key(era: str) -> tuple:
-    """按史料时代从早到晚排序；未知时代排最后。"""
+    """Sort by source era early->late; unknown last."""
     era = (era or '').strip()
     if not era:
         return (1, 9999, '')
@@ -254,7 +254,7 @@ def search_files(query: str, selected_periods, context_lines: int = 2, limit: in
             book_filter.add((period, stem))
             book_filter.add((period, book_part))
 
-    # 目标目录：扫描后按史料时代精排
+    # target books: fine-sort by source era after scan
     if selected_periods:
         ordered_names = sorted(selected_periods, key=period_sort_key)
         dirs = []
@@ -278,7 +278,7 @@ def search_files(query: str, selected_periods, context_lines: int = 2, limit: in
             files = sorted(os.listdir(dirpath))
         except OSError:
             continue
-        # 先按史料时代排书，保证同关键词下早代先被扫到
+        # sort books by source era so earlier texts are scanned first
         book_files = []
         for fname in files:
             if not (fname.endswith('.txt') or fname.endswith('.md')):
@@ -324,7 +324,7 @@ def search_files(query: str, selected_periods, context_lines: int = 2, limit: in
                     'ctx_end': end,
                 })
 
-    # 书：史料时代(早→晚) → 目录时期 → 书名
+    # books: source era (early->late) -> period dir -> title
     # 同一本书内：目录顺序（行号从前往后）
     results.sort(key=lambda r: (
         era_sort_key(r.get('era') or ''),
@@ -610,18 +610,18 @@ class Handler(BaseHTTPRequestHandler):
 
 
 def main():
-    # 确保目录存在
+    # ensure dirs exist
     os.makedirs(DATA_DIR, exist_ok=True)
     os.makedirs(STATIC_DIR, exist_ok=True)
     server = ThreadingHTTPServer(('0.0.0.0', PORT), Handler)
-    print(f'📜 史料检索服务已启动')
+    print(f'📜 Classical Text Search is running')
     print(f'   http://0.0.0.0:{PORT}')
-    print(f'   数据目录: {DATA_DIR}')
-    print(f'   按 Ctrl+C 停止', flush=True)
+    print(f'   data dir: {DATA_DIR}')
+    print(f'   press Ctrl+C to stop', flush=True)
     try:
         server.serve_forever()
     except KeyboardInterrupt:
-        print('\n已停止')
+        print('\nstopped')
         server.server_close()
 
 

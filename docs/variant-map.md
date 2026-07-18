@@ -1,4 +1,4 @@
-# 异体字 / 旧字形映射库
+# Variant character map
 
 > 权威实现：[`scripts/normalize_variants.py`](../scripts/normalize_variants.py)  
 > 流水线位置：`opencc t2s` **之后**、`resegment` **之前**（见 [segment-and-punct.md](segment-and-punct.md)）  

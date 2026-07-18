@@ -1,4 +1,4 @@
-# 史料分段与断句定稿
+# Segmentation & punctuation notes
 
 > 与 Hermes skill `historical-text-segment-and-punct` 同步。  
 > 实现脚本：`scripts/normalize_variants.py` · `scripts/resegment_annots.py` · `scripts/repair_false_punct.py`  

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-<title>史料检索</title>
+<title>Classical Text Search</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -17,7 +17,7 @@ html,body{height:100%;background:var(--bg);color:var(--text);
   -webkit-tap-highlight-color:transparent}
 body{overflow-x:hidden}
 
-/* 顶栏 */
+/* top bar */
 .top{position:sticky;top:0;z-index:30;background:var(--surface);
   border-bottom:1px solid var(--border);padding:calc(8px + var(--safe-t)) 10px 8px}
 .row{display:flex;align-items:center;gap:6px}
@@ -41,7 +41,7 @@ body{overflow-x:hidden}
   display:flex;justify-content:space-between;gap:8px}
 .stats b{color:var(--gold);font-weight:700}
 
-/* 可折叠时期筛选 */
+/* collapsible period filter */
 .period-box{margin-top:8px;background:var(--bg);border:1px solid var(--border);border-radius:12px;overflow:hidden}
 .period-head{display:flex;align-items:center;gap:8px;padding:10px 12px;touch-action:manipulation}
 .period-head:active{background:rgba(184,134,11,.08)}
@@ -62,7 +62,7 @@ body{overflow-x:hidden}
 .chip .n{font-size:11px;opacity:.75}
 .chip:active{opacity:.85}
 
-/* 史料勾选（按时期分组） */
+/* book filter (by period) */
 .book-filter{margin-top:10px;max-height:42vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
 .book-filter-empty{font-size:12px;color:var(--muted);padding:6px 2px}
 .bf-period{border:1px solid var(--border);border-radius:10px;background:var(--surface);margin-bottom:8px;overflow:hidden}
@@ -130,7 +130,7 @@ mark{background:var(--match);padding:0 2px;border-radius:2px}
 .hit-actions button:active{opacity:.7}
 .hit .card-b{padding-top:6px}
 
-/* 加载更多 */
+/* load more */
 .load-more-wrap{padding:12px 8px 20px;text-align:center}
 .load-more-btn{width:100%;max-width:420px;height:44px;border:1px solid var(--border);
   border-radius:12px;background:var(--surface);color:var(--accent);font-size:14px;font-weight:700;
@@ -139,7 +139,7 @@ mark{background:var(--match);padding:0 2px;border-radius:2px}
 .load-more-btn:disabled{opacity:.55}
 .load-more-tip{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5}
 
-/* 全文阅读器 */
+/* full-text reader */
 .reader-mask{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50}
 .reader-mask.show{display:block}
 .reader{
@@ -180,13 +180,13 @@ mark{background:var(--match);padding:0 2px;border-radius:2px}
 .reader-chunk-tip button{border:1px solid var(--border);background:var(--bg);border-radius:8px;
   height:34px;padding:0 14px;font-size:12px;color:var(--accent);margin:0 4px;touch-action:manipulation}
 
-/* 书目阅读按钮 */
+/* open-book button */
 .bf-item .read-btn{border:none;background:var(--goldbg);color:var(--accent);border-radius:8px;
   height:28px;padding:0 8px;font-size:11px;font-weight:600;flex-shrink:0;touch-action:manipulation;margin-top:0}
 .book-group-h .read-all{border:none;background:var(--surface);color:var(--gold);border:1px solid var(--border);
   border-radius:8px;height:30px;padding:0 10px;font-size:12px;font-weight:600;flex-shrink:0;touch-action:manipulation;white-space:nowrap}
 
-/* 书名检索结果卡 */
+/* title-search result card */
 .title-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:8px;padding:12px;display:flex;gap:10px;align-items:flex-start}
 .title-card .info{flex:1;min-width:0}
 .title-card .name{font-size:15px;font-weight:700;color:var(--accent);line-height:1.4}
@@ -195,7 +195,7 @@ mark{background:var(--match);padding:0 2px;border-radius:2px}
   height:36px;padding:0 14px;font-size:13px;font-weight:600;flex-shrink:0;touch-action:manipulation;white-space:nowrap}
 .title-card .read-full:active{opacity:.85}
 
-/* 阅读器内书内检索 */
+/* in-book search */
 .reader-search{display:flex;gap:6px;margin-top:8px;align-items:center}
 .reader-search input{flex:1;min-width:0;height:34px;padding:0 10px;font-size:14px;
   border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text);
@@ -216,46 +216,46 @@ mark{background:var(--match);padding:0 2px;border-radius:2px}
 <div class="top">
   <div class="top-inner">
     <div class="row">
-      <div class="logo">📜 检索</div>
+      <div class="logo">📜 Search</div>
       <div class="search">
-        <input id="q" type="search" placeholder="/ =任一  + =同时  如 无恤/毋恤  无恤+伯鲁" enterkeyhint="search" autocomplete="off">
-        <button class="btn btn-gold" id="go">搜</button>
+        <input id="q" type="search" placeholder="/ = OR   + = AND   e.g. 无恤/毋恤   无恤+伯鲁" enterkeyhint="search" autocomplete="off">
+        <button class="btn btn-gold" id="go">Go</button>
       </div>
     </div>
     <div class="mode-row" id="modeRow">
-      <button type="button" class="mode-btn on" data-mode="fulltext" id="modeFull">全文检索</button>
-      <button type="button" class="mode-btn" data-mode="title" id="modeTitle">书名检索</button>
+      <button type="button" class="mode-btn on" data-mode="fulltext" id="modeFull">Full text</button>
+      <button type="button" class="mode-btn" data-mode="title" id="modeTitle">Title search</button>
     </div>
 
     <div class="period-box" id="periodBox">
       <div class="period-head" id="periodHead">
-        <span class="title">筛选范围</span>
-        <span class="summary" id="periodSummary">加载中…</span>
+        <span class="title">Filters</span>
+        <span class="summary" id="periodSummary">Loading…</span>
         <span class="arrow">▼</span>
       </div>
       <div class="period-body">
         <div class="period-tools">
-          <button type="button" id="toggleAll">全选时期</button>
-          <button type="button" id="onlyHasBook">仅有书时期</button>
-          <button type="button" id="selectAllBooks">全选史料</button>
-          <button type="button" id="clearBooks">清空史料</button>
+          <button type="button" id="toggleAll">Select all periods</button>
+          <button type="button" id="onlyHasBook">Periods with books</button>
+          <button type="button" id="selectAllBooks">Select all books</button>
+          <button type="button" id="clearBooks">Clear books</button>
         </div>
         <div class="chips" id="chips"></div>
         <div class="book-filter" id="bookFilter"></div>
       </div>
     </div>
 
-    <div class="stats"><span id="stL">准备就绪</span><span id="stR"></span></div>
+    <div class="stats"><span id="stL">Ready</span><span id="stR"></span></div>
   </div>
 </div>
 
 <div class="main" id="results">
   <div class="empty">
     <div class="i">📖</div>
-    <p><strong>史料检索就绪</strong></p>
-    <p class="sub">可切换「全文检索 / 书名检索」· 展开筛选范围勾选史料<br>
-      全文：<strong>/</strong>=任一 · <strong>+</strong>=同时　书名：搜「史记」直接找书<br>
-      打开全书后，可在阅读器内再搜本书</p>
+    <p><strong>Ready to search</strong></p>
+    <p class="sub">Switch <strong>Full text / Title search</strong> · open Filters to pick books<br>
+      Full text: <strong>/</strong>=OR · <strong>+</strong>=AND · Title mode finds books by name<br>
+      Open a book to search inside the reader</p>
   </div>
 </div>
 
@@ -263,27 +263,27 @@ mark{background:var(--match);padding:0 2px;border-radius:2px}
 <div class="reader" id="reader">
   <div class="reader-h">
     <div class="reader-top">
-      <button class="back" id="readerBack" type="button">← 返回</button>
+      <button class="back" id="readerBack" type="button">← Back</button>
       <div class="meta">
-        <div class="t" id="readerTitle">全文</div>
+        <div class="t" id="readerTitle">Full text</div>
         <div class="s" id="readerSub"></div>
       </div>
     </div>
     <div class="reader-tools">
       <span class="jump" id="readerJumpInfo"></span>
-      <button type="button" id="prevHit">上一处</button>
-      <button type="button" id="nextHit">下一处</button>
+      <button type="button" id="prevHit">Prev hit</button>
+      <button type="button" id="nextHit">Next hit</button>
       <button type="button" id="fontSmaller">A-</button>
       <button type="button" id="fontBigger">A+</button>
       <span class="jump-box">
-        <input id="jumpLine" type="number" min="1" inputmode="numeric" placeholder="行号">
-        <button type="button" id="jumpGo">跳转</button>
+        <input id="jumpLine" type="number" min="1" inputmode="numeric" placeholder="line">
+        <button type="button" id="jumpGo">Jump</button>
       </span>
     </div>
     <div class="reader-search">
-      <input id="readerQ" type="search" placeholder="在本书中检索  支持 / + " enterkeyhint="search" autocomplete="off">
-      <button type="button" id="readerSearchGo">搜本书</button>
-      <button type="button" class="rs-clear" id="readerSearchClear">清空</button>
+      <input id="readerQ" type="search" placeholder="Search in this book  / and + supported" enterkeyhint="search" autocomplete="off">
+      <button type="button" id="readerSearchGo">Search book</button>
+      <button type="button" class="rs-clear" id="readerSearchClear">Clear</button>
     </div>
     <div class="reader-progress"><i id="readerProgressBar"></i></div>
   </div>
@@ -294,27 +294,27 @@ mark{background:var(--match);padding:0 2px;border-radius:2px}
 const FIXED_PERIODS = ['先秦','秦汉','魏晋南北朝','隋唐五代','辽宋夏金','蒙元','明','清'];
 const state = {
   periods: [],
-  selected: new Set(),          // 选中的时期
-  selectedBooks: new Set(),     // 选中的史料 key: 时期/书名
-  expanded: new Set(),          // 单条命中「展开前后文」
-  collapsedBooks: new Set(),    // 书组 key period||book：收起该书全部命中
+  selected: new Set(),          // selected periods
+  selectedBooks: new Set(),     // selected books key: period/title
+  expanded: new Set(),          // expanded hit context
+  collapsedBooks: new Set(),    // collapsed book groups
   lastData: null,
   loading: false,
   loadingMore: false,
   searchMode: 'fulltext',       // fulltext | title
-  pageLimit: 1000,              // 每页条数（避免 200 硬截断把后排书挤掉）
+  pageLimit: 1000,              // page size (avoid hard 200 cap hiding later books)
   // reader
   readerOpen: false,
   readerLines: [],
   readerHits: [],
   readerHitIdx: -1,
   readerKeywords: [],
-  readerTerms: [],       // [[alt,...], ...] 与搜索 terms 一致，供上一处/下一处
+  readerTerms: [],       // same shape as search terms
   readerTargetLine: 1,
   readerMeta: null,
   readerFont: 15,
-  readerWindow: 400,   // 大书分段渲染窗口（行）
-  readerCenter: 1,     // 当前窗口中心行
+  readerWindow: 400,   // window size for large books (lines)
+  readerCenter: 1,     // current window center line
 };
 
 const $ = id => document.getElementById(id);
@@ -336,7 +336,7 @@ function setSearchMode(mode){
   if (modeTitle) modeTitle.classList.toggle('on', state.searchMode === 'title');
   if (q) {
     q.placeholder = state.searchMode === 'title'
-      ? '书名/作者  如 史记  左传/国语'
+      ? 'Title/author  e.g. 史记  左传/国语'
       : '/ =任一  + =同时  如 无恤/毋恤  无恤+伯鲁';
   }
 }
@@ -365,7 +365,7 @@ function allBookKeys(periodNames){
   return keys;
 }
 function syncBooksWithPeriods(){
-  // 取消时期时，去掉该时期下已选书；新选时期默认全选其书
+  // drop books when period unchecked; auto-select on new period
   const keep = new Set();
   for (const key of state.selectedBooks) {
     const period = key.split('/')[0];
@@ -376,7 +376,7 @@ function syncBooksWithPeriods(){
     if (!books.length) continue;
     const existing = books.some(b => keep.has(bookKey(pn, b.name || '')));
     if (!existing) {
-      // 该时期刚勾上，或之前没有书选中 → 默认全选该时期书
+      // auto-select books for newly checked period
       for (const b of books) {
         const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
         if (name) keep.add(bookKey(pn, name));
@@ -385,10 +385,10 @@ function syncBooksWithPeriods(){
       // 已有部分选择，保留
     }
   }
-  // 若某时期在 selected 里但 keep 里没有该书（用户清空了），不强制回填
-  // 上面 existing 逻辑：若用户主动清空某时期全部书，existing=false 会全选回来——
-  // 改为：仅当该时期完全没有任何 key 且是「新加入」时全选。这里用简单策略：
-  // 只要时期被选中且 keep 中该时期 0 本，则全选该时期。
+  // do not force-refill emptied periods
+  // avoid reselecting after user clears all books in a period —
+  // only auto-select when period has zero selected books:
+  // if period selected and 0 books kept, select all its books.
   for (const pn of state.selected) {
     const hasAny = [...keep].some(k => k.startsWith(pn + '/'));
     if (!hasAny) {
@@ -406,12 +406,12 @@ function renderSummary(){
   const s = state.selected.size;
   const b = state.selectedBooks.size;
   if (!s) {
-    periodSummary.textContent = '未选择时期';
+    periodSummary.textContent = 'No period selected';
   } else {
-    const ptxt = s === n ? `全部时期` : `${s}/${n} 时期`;
-    periodSummary.textContent = `${ptxt} · ${b} 部史料`;
+    const ptxt = s === n ? `All periods` : `${s}/${n} periods`;
+    periodSummary.textContent = `${ptxt} · ${b} books`;
   }
-  toggleAll.textContent = s === n ? '取消全选时期' : '全选时期';
+  toggleAll.textContent = s === n ? 'Clear periods' : 'Select all periods';
 }
 
 function renderChips(){
@@ -426,11 +426,11 @@ function renderChips(){
       const p = el.dataset.p;
       if (state.selected.has(p)) {
         state.selected.delete(p);
-        // 去掉该时期书
+        // remove books for period
         state.selectedBooks = new Set([...state.selectedBooks].filter(k => !k.startsWith(p + '/')));
       } else {
         state.selected.add(p);
-        // 默认勾上该时期全部书
+        // default select all books in period
         for (const b of booksOf(p)) {
           const name = b.name || (b.file || '').replace(/\.(txt|md)$/,'');
           if (name) state.selectedBooks.add(bookKey(p, name));
@@ -446,7 +446,7 @@ function renderChips(){
 function renderBookFilter(){
   const selectedPeriods = FIXED_PERIODS.filter(p => state.selected.has(p));
   if (!selectedPeriods.length) {
-    bookFilter.innerHTML = `<div class="book-filter-empty">先勾选上方时期，再选具体史料</div>`;
+    bookFilter.innerHTML = `<div class="book-filter-empty">Select periods above, then pick books</div>`;
     renderSummary();
     return;
   }
@@ -454,7 +454,7 @@ function renderBookFilter(){
   for (const pn of selectedPeriods) {
     const books = booksOf(pn);
     if (!books.length) {
-      blocks.push(`<div class="bf-period"><div class="bf-period-h"><span class="nm">${pn}</span><span class="meta">暂无史料</span></div></div>`);
+      blocks.push(`<div class="bf-period"><div class="bf-period-h"><span class="nm">${pn}</span><span class="meta">No books</span></div></div>`);
       continue;
     }
     const selectedIn = books.filter(b => state.selectedBooks.has(bookKey(pn, b.name || ''))).length;
@@ -469,14 +469,14 @@ function renderBookFilter(){
       return `<label class="bf-item ${off}">
         <input type="checkbox" data-key="${key}" ${checked}>
         <span class="info"><span class="label">${label}</span>${sub ? `<div class="sub">${sub}</div>` : ''}</span>
-        <button type="button" class="read-btn" data-read-period="${pn}" data-read-file="${file}" data-read-label="${(label||'').replace(/"/g,'&quot;')}" data-read-era="${b.era||''}" data-read-author="${b.author||''}">阅读</button>
+        <button type="button" class="read-btn" data-read-period="${pn}" data-read-file="${file}" data-read-label="${(label||'').replace(/"/g,'&quot;')}" data-read-era="${b.era||''}" data-read-author="${b.author||''}">Read</button>
       </label>`;
     }).join('');
     blocks.push(`<div class="bf-period" data-period="${pn}">
       <div class="bf-period-h">
         <span class="nm">${pn}</span>
         <span class="meta">${selectedIn}/${books.length}</span>
-        <button type="button" data-toggle-period="${pn}">${selectedIn===books.length?'取消全选':'全选'}</button>
+        <button type="button" data-toggle-period="${pn}">${selectedIn===books.length?'Clear':'Select all'}</button>
       </div>
       <div class="bf-list">${items}</div>
     </div>`);
@@ -548,10 +548,10 @@ onlyHasBook.onclick = (e) => {
 
 selectAllBooks.onclick = (e) => {
   e.stopPropagation();
-  // 仅对当前已选时期全选史料
+  // select all books for currently selected periods
   const periods = [...state.selected];
   if (!periods.length) {
-    // 若没选时期，先选有书时期
+    // if no period selected, select periods that have books
     const withBooks = FIXED_PERIODS.filter(n => countOf(n) > 0);
     state.selected = new Set(withBooks.length ? withBooks : FIXED_PERIODS);
   }
@@ -567,7 +567,7 @@ clearBooks.onclick = (e) => {
 };
 
 async function loadPeriods(){
-  // 先渲染固定时期，保证立即可用
+  // render fixed periods immediately
   state.selected = new Set(FIXED_PERIODS);
   renderChips();
   renderBookFilter();
@@ -582,13 +582,13 @@ async function loadPeriods(){
     renderChips();
     renderBookFilter();
     const books = state.periods.reduce((a,p)=>a+(p.total_books||0),0);
-    stL.textContent = `共 ${books} 部史料 · 点「筛选范围」可勾选时期/书`;
+    stL.textContent = `${books} books · open Filters to pick periods/books`;
   }catch(e){
-    stL.textContent = '时期列表加载失败，仍可尝试搜索';
+    stL.textContent = 'Failed to load periods; search may still work';
   }
 }
 
-/** 前端解析 / + 检索式（与后端 parse_query 对齐） */
+/** front-end parse of / + query (mirrors backend parse_query) */
 function parseQueryClient(query){
   let q = String(query || '').trim();
   if (!q) return { terms: [], keywords: [] };
@@ -646,23 +646,23 @@ function collectHits(lines, terms, keywords){
 async function doSearch(){
   const query = q.value.trim();
   if(!query){
-    results.innerHTML = `<div class="empty"><div class="i">🔍</div><p>输入关键词开始搜索</p></div>`;
+    results.innerHTML = `<div class="empty"><div class="i">🔍</div><p>Enter a query to start</p></div>`;
     return;
   }
   if(!state.selected.size){
-    results.innerHTML = `<div class="empty"><div class="i">⚠️</div><p>请至少选择一个时期</p><p class="sub">展开顶部「筛选范围」勾选</p></div>`;
+    results.innerHTML = `<div class="empty"><div class="i">⚠️</div><p>Select at least one period</p><p class="sub">Open Filters at the top</p></div>`;
     return;
   }
   if(!state.selectedBooks.size){
-    results.innerHTML = `<div class="empty"><div class="i">⚠️</div><p>请至少勾选一部史料</p><p class="sub">在「筛选范围」里勾选具体书名</p></div>`;
+    results.innerHTML = `<div class="empty"><div class="i">⚠️</div><p>Select at least one book</p><p class="sub">Pick titles under Filters</p></div>`;
     return;
   }
   if(state.loading) return;
   state.loading = true;
   state.expanded = new Set();
   state.collapsedBooks = new Set();
-  const modeLabel = state.searchMode === 'title' ? '书名' : '全文';
-  stL.textContent = `${modeLabel}搜索中…`;
+  const modeLabel = state.searchMode === 'title' ? 'Title' : 'Full text';
+  stL.textContent = `${modeLabel}Searching…`;
   stR.textContent = `「${query}」`;
   try{
     const periods = [...state.selected].join(',');
@@ -675,8 +675,8 @@ async function doSearch(){
     state.lastData = data;
     renderResults(data);
   }catch(e){
-    stL.textContent = '请求失败';
-    results.innerHTML = `<div class="empty"><div class="i">❌</div><p>网络错误</p><p class="sub">${e.message}</p></div>`;
+    stL.textContent = 'Request failed';
+    results.innerHTML = `<div class="empty"><div class="i">❌</div><p>Network error</p><p class="sub">${e.message}</p></div>`;
   }finally{
     state.loading = false;
   }
@@ -713,7 +713,7 @@ async function loadMoreResults(){
     renderResults(merged);
     window.scrollTo(0, y);
   }catch(e){
-    stR.textContent = '加载更多失败: ' + e.message;
+    stR.textContent = 'Load more failed: ' + e.message;
   }finally{
     state.loadingMore = false;
   }
@@ -751,14 +751,14 @@ function renderResults(data){
   const keywords = data.keywords || [];
   const mode = data.mode || state.searchMode || 'fulltext';
   if(!total){
-    stL.innerHTML = `<b>0</b> 条结果`;
-    results.innerHTML = `<div class="empty"><div class="i">🔍</div><p>未找到「<strong>${data.query||''}</strong>」</p><p class="sub">${mode==='title'?'试试别的书名/作者，或切到全文检索':'试试其他关键词，或扩大时期范围'}</p></div>`;
+    stL.innerHTML = `<b>0</b> results`;
+    results.innerHTML = `<div class="empty"><div class="i">🔍</div><p>No results for «<strong>${data.query||''}</strong>»</p><p class="sub">${mode==='title'?'Try another title/author, or switch to Full text':'Try other keywords, or widen period filters'}</p></div>`;
     return;
   }
 
-  // ===== 书名检索：一书一卡 + 阅读全文 =====
+  // ===== title search: one card per book =====
   if (mode === 'title') {
-    stL.innerHTML = `<b>${total}</b> 部书 · 书名检索`;
+    stL.innerHTML = `<b>${total}</b> books · title search`;
     stR.textContent = `「${data.query||''}」`;
     results.innerHTML = list.map((r, idx) => {
       const label = r.label || r.book || '';
@@ -768,7 +768,7 @@ function renderResults(data){
           <div class="name">📄 ${highlight(label, keywords)}</div>
           <div class="meta">${meta}</div>
         </div>
-        <button type="button" class="read-full" data-title-open="${idx}">📖 阅读全文</button>
+        <button type="button" class="read-full" data-title-open="${idx}">📖 Read full text</button>
       </div>`;
     }).join('');
     results.querySelectorAll('[data-title-open]').forEach(el => {
@@ -781,19 +781,19 @@ function renderResults(data){
     return;
   }
 
-  // ===== 全文检索 =====
+  // ===== Full text =====
   const returned = data.returned != null ? data.returned : list.length;
   const hasMore = !!data.has_more || returned < total;
   const books = new Set(list.map(x => x.period + '/' + x.book)).size;
   const periods = new Set(list.map(x => x.period)).size;
   if (hasMore) {
-    stL.innerHTML = `<b>${total}</b> 条命中 · 已显示 <b>${returned}</b> · ${books} 部书`;
+    stL.innerHTML = `<b>${total}</b> hits · shown <b>${returned}</b> · ${books} books`;
   } else {
-    stL.innerHTML = `<b>${total}</b> 条 · ${books} 部书 · ${periods} 个时期`;
+    stL.innerHTML = `<b>${total}</b> hits · ${books} books · ${periods} periods`;
   }
   stR.textContent = `「${data.query||''}」`;
 
-  // 同一本书的不同命中放在一起；书组按史料时代（标签 [西汉] 等）从早到晚
+  // group hits by book; sort groups by source era early→late
   const ERA_ORDER = ['远古','上古','夏','商','西周','西周至春秋','春秋','战国','先秦','秦','西汉','东汉','汉','三国','三国魏','三国蜀','三国吴','西晋','东晋','南朝宋','南朝齐','梁','南朝梁','南朝陈','北魏','东魏','西魏','北齐','北周','魏晋','隋','唐','五代','后梁','后唐','后晋','后汉','后周','辽','北宋','南宋','宋','金','西夏','蒙元','元','明','清','民国','现代'];
   const PERIOD_ORDER = ['先秦','秦汉','魏晋南北朝','隋唐五代','辽宋夏金','蒙元','明','清'];
   const eraRank = (e) => {
@@ -828,16 +828,16 @@ function renderResults(data){
     if (d2 !== 0) return d2;
     return (a.book || '').localeCompare(b.book || '', 'zh');
   });
-  // 同一本书内：按目录顺序（正文行号从前往后）
+  // within a book: keep source line order
   groups.forEach(g => {
     g.items.sort((a, b) => (a.r.line || 0) - (b.r.line || 0));
   });
 
-  // 顶栏：全书结果较多时一键收起/展开全部书组
+  // top bar: collapse/expand all book groups
   const multiHitGroups = groups.filter(g => g.items.length >= 2).length;
   if (groups.length >= 2 || multiHitGroups) {
     const allCollapsed = groups.length > 0 && groups.every(g => state.collapsedBooks.has(g.key));
-    stR.innerHTML = `<button type="button" id="toggleAllBooksBtn" style="border:none;background:none;color:var(--gold);font-size:12px;font-weight:700;touch-action:manipulation;padding:0">${allCollapsed ? '展开全部书' : '收起全部书'}</button>`;
+    stR.innerHTML = `<button type="button" id="toggleAllBooksBtn" style="border:none;background:none;color:var(--gold);font-size:12px;font-weight:700;touch-action:manipulation;padding:0">${allCollapsed ? 'Expand all books' : 'Collapse all books'}</button>`;
   }
 
   let html = groups.map(g => {
@@ -849,11 +849,11 @@ function renderResults(data){
       const mi = Math.max(0, all.findIndex(c => c.is_match));
       const matchLine = all[mi] || { line: r.line, text: r.text || '', is_match: true };
       const isExpanded = state.expanded.has(key);
-      // 默认：只显示命中那一行的整段原文；展开才带前后文
+      // default: show hit line only; expand for context
       const show = isExpanded ? all : [matchLine];
       const ctx = show.map(c => {
         const raw = c.text || ' ';
-        // 命中行整段展示；前后文行过长时再截
+        // full hit line; truncate long context lines
         const shown = c.is_match
           ? raw
           : (raw.length > 160 ? snippetAround(raw, keywords, 70) : raw);
@@ -864,12 +864,12 @@ function renderResults(data){
         </div>`;
       }).join('');
       const canExpand = all.length > 1;
-      const moreLabel = isExpanded ? '收起' : `展开前后文(${all.length}行)`;
+      const moreLabel = isExpanded ? 'Hide context' : `Show context (${all.length} lines)`;
       return `<div class="hit${isExpanded?' expanded':''}">
         <div class="hit-h">
-          <span class="ln">第${r.line}行</span>
+          <span class="ln">L${r.line}</span>
           <div class="hit-actions">
-            <button type="button" data-open="${idx}">📖 打开定位</button>
+            <button type="button" data-open="${idx}">📖 Open at line</button>
             ${canExpand || isExpanded ? `<button type="button" data-more="${key}">${moreLabel}</button>` : ''}
           </div>
         </div>
@@ -879,21 +879,21 @@ function renderResults(data){
 
     const metaBits = [
       g.period,
-      `${n} 处命中`,
-      gCollapsed ? '已收起' : '',
+      `${n} hits`,
+      gCollapsed ? 'collapsed' : '',
       hasMore ? '（当前页）' : '',
     ].filter(Boolean).join(' · ');
-    const collapseLabel = gCollapsed ? `▶ 展开 ${n} 条` : (n >= 2 ? `▼ 收起本书` : `▼ 收起`);
+    const collapseLabel = gCollapsed ? `▶ Expand ${n}` : (n >= 2 ? `▼ Collapse book` : `▼ Collapse`);
 
     return `<div class="book-group${gCollapsed ? ' collapsed' : ''}" data-gkey="${g.key}">
       <div class="book-group-h">
-        <div class="bg-info" data-toggle-book="${g.key}" title="点击收起/展开本书结果">
+        <div class="bg-info" data-toggle-book="${g.key}" title="Collapse / expand this book">
           <div class="book-group-title">📄 ${g.label}</div>
           <div class="book-group-meta">${metaBits}</div>
         </div>
         <div class="book-group-actions">
           <button type="button" data-toggle-book="${g.key}">${collapseLabel}</button>
-          <button type="button" class="read-all" data-read-group="${g.firstIdx}">📖 阅读全书</button>
+          <button type="button" class="read-all" data-read-group="${g.firstIdx}">📖 Read book</button>
         </div>
       </div>
       <div class="book-group-b">${hitsHtml}</div>
@@ -903,8 +903,8 @@ function renderResults(data){
   if (hasMore) {
     const remain = Math.max(0, total - returned);
     html += `<div class="load-more-wrap">
-      <button type="button" class="load-more-btn" id="loadMoreBtn">⬇ 加载更多（还剩 ${remain} 条）</button>
-      <div class="load-more-tip">共 ${total} 条命中；按史料时代排序后分页显示，后排书（如金史）可能在下一页</div>
+      <button type="button" class="load-more-btn" id="loadMoreBtn">⬇ Load more (${remain} left)</button>
+      <div class="load-more-tip">${total} hits total; sorted by source era, later books may appear on next pages</div>
     </div>`;
   }
   results.innerHTML = html;
@@ -966,27 +966,27 @@ function renderResults(data){
   if (loadMoreBtn) {
     loadMoreBtn.onclick = async () => {
       loadMoreBtn.disabled = true;
-      loadMoreBtn.textContent = '加载中…';
+      loadMoreBtn.textContent = 'Loading…';
       await loadMoreResults();
     };
   }
 }
 
 async function openReader(hit, keywords, terms){
-  readerTitle.textContent = hit.label || hit.book || hit.file || '全文';
+  readerTitle.textContent = hit.label || hit.book || hit.file || 'Full text';
   const subParts = [hit.period];
   if (hit.era) subParts.push(hit.era);
   if (hit.author) subParts.push(hit.author);
-  if (hit.line) subParts.push(`定位第 ${hit.line} 行`);
+  if (hit.line) subParts.push(`at line ${hit.line}`);
   readerSub.textContent = subParts.join(' · ');
-  readerBody.innerHTML = `<div class="empty"><p>加载全文中…</p></div>`;
+  readerBody.innerHTML = `<div class="empty"><p>Loading full text…</p></div>`;
   readerMask.classList.add('show');
   reader.classList.add('open');
   document.body.style.overflow = 'hidden';
   state.readerOpen = true;
   state.readerKeywords = keywords || [];
-  // terms 优先用入参；否则从上次搜索结果取；再否则用扁平关键词当 AND
-  // 书名检索打开时 keywords/terms 为空，不沿用全局全文检索 terms
+  // prefer explicit terms; else last search; else flat keywords as AND
+  // title-open has empty keywords/terms; do not reuse full-text terms
   if (Array.isArray(terms)) {
     state.readerTerms = terms;
   } else if (keywords && keywords.length) {
@@ -1015,10 +1015,10 @@ async function openReader(hit, keywords, terms){
     const sub2 = [data.period || hit.period];
     if (data.era) sub2.push(data.era);
     if (data.author) sub2.push(data.author);
-    sub2.push(`共 ${data.total_lines || (data.lines||[]).length} 行`);
+    sub2.push(`${data.total_lines || (data.lines||[]).length} lines`);
     readerSub.textContent = sub2.join(' · ');
     state.readerLines = data.lines || [];
-    // 用与搜索相同的 OR/AND 规则收集命中，否则 无恤/毋恤 会得到空列表，上一处/下一处无反应
+    // collect hits with same OR/AND rules so prev/next work for alternates
     state.readerHits = collectHits(state.readerLines, state.readerTerms, state.readerKeywords);
     let idx = state.readerHits.indexOf(state.readerTargetLine);
     if (idx < 0) idx = state.readerHits.length ? 0 : -1;
@@ -1032,7 +1032,7 @@ async function openReader(hit, keywords, terms){
       updateReaderProgress();
     });
   }catch(e){
-    readerBody.innerHTML = `<div class="empty"><div class="i">❌</div><p>加载全文失败</p><p class="sub">${e.message}</p></div>`;
+    readerBody.innerHTML = `<div class="empty"><div class="i">❌</div><p>Failed to load full text</p><p class="sub">${e.message}</p></div>`;
   }
 }
 
@@ -1058,13 +1058,13 @@ function renderReader(){
   const total = state.readerLines.length;
   const [start, end] = readerWindowRange();
   readerJumpInfo.textContent = state.readerHits.length
-    ? `命中 ${state.readerHitIdx+1}/${state.readerHits.length} · 第${target}/${total}行`
-    : (kws.length ? `全文 ${total} 行 · 本书无匹配` : `全文 ${total} 行 · 显示 ${start+1}-${end}`);
+    ? `hit ${state.readerHitIdx+1}/${state.readerHits.length} · line ${target}/${total}`
+    : (kws.length ? `Full text ${total} lines · no match in book` : `Full text ${total} lines · showing ${start+1}-${end}`);
   let html = '';
   if (start > 0) {
-    html += `<div class="reader-chunk-tip">已隐藏前文 1–${start} 行
-      <button type="button" data-load-prev>↑ 加载上文</button>
-      <button type="button" data-load-start>到开头</button></div>`;
+    html += `<div class="reader-chunk-tip">Hidden earlier lines 1–${start}
+      <button type="button" data-load-prev>↑ Load earlier</button>
+      <button type="button" data-load-start>Go to start</button></div>`;
   }
   for (let i = start; i < end; i++) {
     const line = state.readerLines[i] || ' ';
@@ -1077,11 +1077,11 @@ function renderReader(){
     </div>`;
   }
   if (end < total) {
-    html += `<div class="reader-chunk-tip">已隐藏后文 ${end+1}–${total} 行
-      <button type="button" data-load-next>↓ 加载下文</button>
-      <button type="button" data-load-end>到结尾</button></div>`;
+    html += `<div class="reader-chunk-tip">Hidden later lines ${end+1}–${total}
+      <button type="button" data-load-next>↓ Load later</button>
+      <button type="button" data-load-end>Go to end</button></div>`;
   }
-  readerBody.innerHTML = html || `<div class="empty"><p>无内容</p></div>`;
+  readerBody.innerHTML = html || `<div class="empty"><p>No content</p></div>`;
   readerBody.querySelectorAll('[data-load-prev]').forEach(b => b.onclick = () => {
     state.readerCenter = Math.max(1, start - Math.floor(state.readerWindow/2) + 1);
     renderReader();
@@ -1161,7 +1161,7 @@ function applyInBookSearch(){
   if (!state.readerHits.length) {
     state.readerHitIdx = -1;
     renderReader();
-    if (readerJumpInfo) readerJumpInfo.textContent = `本书无匹配「${qtext}」`;
+    if (readerJumpInfo) readerJumpInfo.textContent = `No match in this book for «${qtext}»`;
     return;
   }
   // 优先保留当前行若仍命中，否则跳到第一处
