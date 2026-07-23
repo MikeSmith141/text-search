@@ -1,6 +1,6 @@
 # 古籍全文检索系统
 
-[![Python 3](https://img.shields.io/badge/python-3.8+-blue?logo=python)](https://docs.python.org/3/library/http.server.html) · 零外部依赖 · 移动端适配 · [在线演示](https://history.997547.xyz)
+[![Python 3](https://img.shields.io/badge/python-3.8+-blue?logo=python)](https://docs.python.org/3/library/http.server.html) · 零外部依赖 · 移动端适配 · 自托管
 
 自托管全文检索 Web 应用，面向中国古典/历史文献。后端纯 Python 标准库实现，前端单页 HTML5 应用，移动端优先。
 
@@ -17,12 +17,6 @@
 | **书中检索** | 阅读器中搜索关键词，上一处/下一处跳转 |
 | **多字体** | 系统默认 / 霞鹜文楷（LXGW WenKai） |
 | **双模式** | 全文检索 / 书名检索 两种查询模式 |
-
-### 查检索界面
-
-![搜索结果页](https://raw.githubusercontent.com/MikeSmith141/text-search/main/docs/screenshots/search-results.png)
-
-搜索框输入关键词，选择时代范围，结果以书目分组、按年代早到晚排序，命中关键词高亮显示。
 
 ### 全文阅读器
 
