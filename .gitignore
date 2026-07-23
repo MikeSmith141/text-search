@@ -22,6 +22,21 @@ data/_raw_no_punct/**/user_upload*/
 data/_private/
 **/user_private/**
 
+# Local-only meta (non-PD books not in public origin)
+data/books_meta.local.json
+data/books_meta.json
+
+# All corpus text files — not pushed to public repo
+data/**/*.txt
+
+# Non-public-domain modern copyrighted texts (OCR of commercial editions)
+data/蒙元/史集.txt
+
+# Intermediate/research artifacts under active period dirs (backup/merge artifacts)
+data/蒙元/_backup_removed/
+data/蒙元/_bak_footnote_fix/
+data/蒙元/_merged_parts_*/
+
 # Note: raw public-domain sources under data/_raw_no_punct/ (*.txt) ARE tracked.
 # Non-public-domain modern editions must stay local-only.
 
